@@ -104,6 +104,11 @@ namespace Crying
             }
         }
 
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (rom == null || cry.Offset == 0) return;
+        }
+
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             rom?.Dispose();
@@ -120,7 +125,24 @@ namespace Crying
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (cry.Offset == 0) return;
 
+            openFileDialog1.Title = "Import Cry";
+            openFileDialog1.Filter = "Wave Files|*.wav";
+
+            if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
+
+            // TODO: support more formats
+            try
+            {
+                if (ImportCry(openFileDialog1.FileName))
+                    DisplayCry(cry.Index, listBox1.SelectedIndex);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"error: {ex.Message}");
+            }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -132,7 +154,7 @@ namespace Crying
 
             if (saveFileDialog1.ShowDialog() != DialogResult.OK) return;
 
-            // TODO: support other formats
+            // TODO: support more formats
             ExportCry(saveFileDialog1.FileName);
         }
 
@@ -155,21 +177,7 @@ namespace Crying
             LoadCry(tableIndex);
 
             // cry loaded, output
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"POKéMON {pokemonIndex}");
-            sb.AppendLine($"CRY {tableIndex}");
-            sb.AppendLine($"Offset: 0x{cry.Offset:X6}");
-            sb.AppendLine($"Sample Rate: {cry.SampleRate} Hz");
-
-            sb.AppendLine("Data:");
-            foreach (var b in cry.Data)
-            {
-                sb.Append($"{b:X2} ");
-            }
-            sb.AppendLine();
-
-            richTextBox1.Text = sb.ToString();
+            DisplayCry(tableIndex, pokemonIndex);
         }
 
         int GetCryIndex(int pokemonIndex)
@@ -205,6 +213,8 @@ namespace Crying
 
         bool LoadCry(int index)
         {
+            if (rom == null) return;
+
             // load cry table entry
             rom.Seek(cryTable + index * 12);
             var someValue = rom.ReadUInt32();
@@ -274,6 +284,13 @@ namespace Crying
             return true;
         }
 
+        void SaveCry()
+        {
+            if (rom == null || cry.Offset == 0) return;
+
+
+        }
+
         void ExportCry(string filename)
         {
             if (cry.Offset == 0) return;
@@ -307,6 +324,72 @@ namespace Crying
                 writer.Seek(4, SeekOrigin.Begin);
                 writer.Write((int)writer.BaseStream.Length - 8);
             }
+        }
+
+        void ImportCry(string filename)
+        {
+            if (cry.Offset == 0) return;
+
+            // load a wave file
+            using (var reader = new BinaryReader(File.OpenRead(filename)))
+            {
+                // read RIFF header
+                if (reader.ReadUInt32() != 0x46464952)
+                    throw new Exception("This is not a WAVE file!");
+                if (reader.ReadInt32() + 8 != reader.BaseStream.Length)
+                    throw new Exception("Invalid file length!");
+                if (reader.ReadUInt32() != 0x45564157)
+                    throw new Exception("This is not a WAVE file!");
+
+                // read fmt chunk
+                if (reader.ReadUInt32() != 0x20746D66)
+                    throw new Exception("Expected fmt chunk!");
+                if (reader.ReadInt32() != 16)
+                    throw new Exception("Invalid fmt chunk!");
+                if (reader.ReadInt16() != 1)          // only PCM format allowed
+                    throw new Exception("Cry must be in PCM format!");
+                if (reader.ReadInt16() != 1)          // only 1 channel allowed
+                    throw new Exception("Cry cannot have more than one channel!");
+                cry.SampleRate = reader.ReadInt32();
+                if (reader.ReadInt32() != cry.SampleRate)
+                    throw new Exception("Invalid fmt chunk!");
+                reader.ReadUInt16();
+                var bitsPerSample = reader.ReadUInt16();
+                if (bitsPerSample != 8)              // for now, only 8 bit PCM data
+                    throw new Exception($"Cries must be 8-bit WAVE files! Got {bitsPerSample}-bit instead.");
+
+                // data chunk
+                if (reader.ReadUInt32() != 0x61746164)
+                    throw new Exception("Expected data chunk!!");
+                var dataSize = reader.ReadInt32();
+
+                cry.Data = new sbyte[dataSize];
+                for (int i = 0; i < dataSize; i++)  // read 8-bit unsigned PCM and convert to GBA signed form
+                    cry.Data[i] = (sbyte)(reader.ReadByte() - 128);
+            }
+
+            // resetting some other properties just in case
+            cry.Looped = false;
+            cry.LoopStart = 0;
+        }
+
+        void DisplayCry(int tableIndex, int pokemonIndex)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($"POKéMON {pokemonIndex}");
+            sb.AppendLine($"CRY {tableIndex}");
+            sb.AppendLine($"Offset: 0x{cry.Offset:X6}");
+            sb.AppendLine($"Sample Rate: {cry.SampleRate} Hz");
+
+            sb.AppendLine("Data:");
+            foreach (var b in cry.Data)
+            {
+                sb.Append($"{b:X2} ");
+            }
+            sb.AppendLine();
+
+            richTextBox1.Text = sb.ToString();
         }
     }
 }
