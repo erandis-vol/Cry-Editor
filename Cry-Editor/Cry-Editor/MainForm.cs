@@ -107,6 +107,9 @@ namespace Crying
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (rom == null || cry.Offset == 0) return;
+
+            SaveCry();
+            rom.Save();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -135,9 +138,8 @@ namespace Crying
             // TODO: support more formats
             try
             {
-                if (ImportCry(openFileDialog1.FileName))
-                    DisplayCry(cry.Index, listBox1.SelectedIndex);
-
+                ImportCry(openFileDialog1.FileName);
+                DisplayCry(cry.Index, listBox1.SelectedIndex);
             }
             catch (Exception ex)
             {
@@ -213,13 +215,14 @@ namespace Crying
 
         bool LoadCry(int index)
         {
-            if (rom == null) return;
+            if (rom == null)
+                return false;
 
             // load cry table entry
             rom.Seek(cryTable + index * 12);
-            var someValue = rom.ReadUInt32();
+            var someValue = rom.ReadInt32();
             var cryOffset = rom.ReadPointer();
-            var cryShape = rom.ReadUInt32();
+            var cryShape = rom.ReadInt32();
 
             if (cryOffset == 0)
                 return false;
@@ -233,7 +236,7 @@ namespace Crying
             cry.Looped = rom.ReadUInt16() == 0x4000;
             cry.SampleRate = rom.ReadInt32() >> 10;
             cry.LoopStart = rom.ReadInt32();
-            cry.Size = rom.ReadInt32();
+            cry.Size = rom.ReadInt32() + 1;
 
             if (!cry.Compressed)
             {
@@ -245,7 +248,8 @@ namespace Crying
             else
             {
                 // compressed, a bit of a hassle
-                var lookup = new byte[] { 0x0, 0x1, 0x4, 0x9, 0x10, 0x19, 0x24, 0x31, 0xC0, 0xCF, 0xDC, 0xE7, 0xF0, 0xF7, 0xFC, 0xFF };
+                var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
+
                 int alignment = 0, size = 0;
                 sbyte pcmLevel = 0;
 
@@ -264,12 +268,12 @@ namespace Crying
                     if (alignment < 0x20)
                     {
                         // first nybble
-                        pcmLevel += (sbyte)lookup[input >> 4];
+                        pcmLevel += lookup[input >> 4];
                         data.Add(pcmLevel);
                     }
 
                     // second nybble
-                    pcmLevel += (sbyte)lookup[input & 0xF];
+                    pcmLevel += lookup[input & 0xF];
                     data.Add(pcmLevel);
 
                     // exit when currentSize >= cry.Size
@@ -287,8 +291,102 @@ namespace Crying
         void SaveCry()
         {
             if (rom == null || cry.Offset == 0) return;
+            //var lookup = new byte[] { 0x0, 0x1, 0x4, 0x9, 0x10, 0x19, 0x24, 0x31, 0xC0, 0xCF, 0xDC, 0xE7, 0xF0, 0xF7, 0xFC, 0xFF };
+            var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
 
+            // compressed cries are not allowed
+            cry.Compressed = false;
 
+            // copy cry data to be written
+            var data = new List<byte>();
+            if (cry.Compressed)
+            {
+                // data is compressed in blocks of 1 + 0x20 bytes at a time
+                // first byte is normal signed PCM data
+                // following 0x20 bytes are compressed based on previous value
+                // (for a value not in lookup table, closest value will be chosen instead)
+
+                // each block has 0x40 samples
+                var blockCount = cry.Data.Length / 0x40;
+                if (cry.Data.Length % 0x40 > 0) blockCount++;
+
+                var blocks = new byte[blockCount][];
+                for (int n = 0; n < blockCount; n++)
+                {
+                    // create new block
+                    blocks[n] = new byte[0x21];
+                    int i = n * 0x40;
+                    int k = 0;
+
+                    // set first value
+                    blocks[n][k++] = (byte)cry.Data[i];
+                    sbyte pcm = cry.Data[i++];
+
+                    for (int j = 1; j < 0x40 && i < cry.Data.Length; j++)
+                    {
+                        // get current sample
+                        var sample = cry.Data[i++];
+
+                        // difference between previous sample and this
+                        var diff = pcm - sample;
+
+                        // TODO: ensure diff conforms to num^2 = diff
+
+                        // find closet match in lookup table
+                        int lookupV = 0;
+                        for (int x = 0; x < 16; x++)
+                        {
+                            if (lookup[x] == diff)
+                            {
+                                lookupV = x;
+                                break;
+                            }
+                        }
+
+                        // set value in block
+                        // on an odd value, increase position in block
+                        if (j % 2 == 0)
+                            blocks[n][k] |= (byte)(lookupV << 4);
+                        else
+                            blocks[n][k++] |= (byte)lookupV;
+
+                        // set previous
+                        pcm = sample;
+                    }
+                }
+
+                for (int n = 0; n < blockCount; n++)
+                    data.AddRange(blocks[n]);
+            }
+            else
+            {
+                // uncompressed, copy directly to data
+                Console.WriteLine("uncompressed");
+                foreach (var s in cry.Data)
+                    data.Add((byte)s);
+            }
+
+            // determine if cry requires repointing
+            //if (cry.Size < data.Count)
+            //{
+            //    Console.WriteLine("repoint required");
+            //    return;
+            //}
+
+            // write cry
+            rom.Seek(cry.Offset);
+            rom.WriteUInt16((ushort)(cry.Compressed ? 0 : 0));
+            rom.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0));
+            rom.WriteInt32(cry.SampleRate << 10);
+            rom.WriteInt32(cry.LoopStart);
+            rom.WriteInt32(cry.Data.Length - 1);
+            rom.WriteBytes(data.ToArray());
+
+            // write cry table entry
+            rom.Seek(cryTable + cry.Index * 12);
+            rom.WriteUInt32(cry.Compressed ? 0x00003C20u : 0x00003C00u);
+            rom.WritePointer(cry.Offset);
+            rom.WriteUInt32(0x00FF00FFu);
         }
 
         void ExportCry(string filename)

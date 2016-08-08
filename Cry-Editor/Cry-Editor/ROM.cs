@@ -12,6 +12,7 @@ namespace Crying
         private int pos = 0;
         private string filePath;
         private FileSystemWatcher fileWatcher;
+        private bool ignoreChange;
 
         private bool disposed;
 
@@ -66,6 +67,8 @@ namespace Crying
             {
                 fs.Write(buffer, 0, buffer.Length);
             }
+
+            ignoreChange = true;
         }
 
         public void Seek(int offset)
@@ -343,6 +346,11 @@ namespace Crying
         void OnSourceFileChanged(object sender, FileSystemEventArgs e)
         {
             Console.WriteLine($"ROM {e.FullPath} changed {e.ChangeType}.");
+            if (ignoreChange)
+            {
+                ignoreChange = false;
+                return;
+            }
 
             if (e.FullPath == filePath)
             {
