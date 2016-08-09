@@ -144,7 +144,7 @@ namespace Crying
                 if (lastBlockSize == 0)
                     lastBlockSize = 0x21;
                 else
-                    lastBlockSize = 1 + (lastBlockSize / 2);
+                    lastBlockSize = 1 + (lastBlockSize / 2) + (lastBlockSize % 2 == 0 ? 0 : 1);
 
                 var blocks = new byte[blockCount][];
                 for (int n = 0; n < blockCount; n++)
