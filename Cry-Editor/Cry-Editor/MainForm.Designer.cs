@@ -169,7 +169,7 @@
             this.gCry.Controls.Add(this.lTable);
             this.gCry.Location = new System.Drawing.Point(12, 137);
             this.gCry.Name = "gCry";
-            this.gCry.Size = new System.Drawing.Size(327, 393);
+            this.gCry.Size = new System.Drawing.Size(327, 464);
             this.gCry.TabIndex = 2;
             this.gCry.TabStop = false;
             this.gCry.Text = "Cry";
@@ -256,14 +256,15 @@
             this.panel1.Controls.Add(this.pSample);
             this.panel1.Location = new System.Drawing.Point(9, 236);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(309, 151);
+            this.panel1.Size = new System.Drawing.Size(309, 222);
             this.panel1.TabIndex = 7;
             // 
             // pSample
             // 
             this.pSample.Location = new System.Drawing.Point(0, 0);
             this.pSample.Name = "pSample";
-            this.pSample.Size = new System.Drawing.Size(16, 128);
+            this.pSample.Size = new System.Drawing.Size(16, 16);
+            this.pSample.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.pSample.TabIndex = 0;
             this.pSample.TabStop = false;
             // 
@@ -283,12 +284,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(351, 542);
+            this.ClientSize = new System.Drawing.Size(351, 613);
             this.Controls.Add(this.gCry);
             this.Controls.Add(this.gROM);
             this.Controls.Add(this.menuStrip1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimizeBox = false;
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Cry Editor";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -299,6 +303,7 @@
             this.gCry.ResumeLayout(false);
             this.gCry.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pSample)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

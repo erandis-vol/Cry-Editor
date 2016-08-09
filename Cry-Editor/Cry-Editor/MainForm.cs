@@ -40,6 +40,7 @@ namespace Crying
         int cryTable, hoennCryOrder;
 
         Cry cry = new Cry();
+        Bitmap cryImage;
 
         public MainForm()
         {
@@ -63,6 +64,7 @@ namespace Crying
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             rom?.Dispose();
+            cryImage?.Dispose();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -565,6 +567,20 @@ namespace Crying
 
             chkCompressed.Checked = cry.Compressed;
             chkLooped.Checked = cry.Looped;
+
+            // draw the cry
+            cryImage?.Dispose();
+            cryImage = new Bitmap(cry.Data.Length, 128);
+
+            using (var g = Graphics.FromImage(cryImage))
+            {
+                for (int i = 1; i < cry.Data.Length; i++)
+                {
+                    g.DrawLine(Pens.Green, i - 1, 64 + cry.Data[i - 1], i, 64 + cry.Data[i]);
+                }
+            }
+
+            pSample.Image = cryImage;
         }
 
         void ClearCry()
@@ -577,7 +593,9 @@ namespace Crying
             chkCompressed.Checked = false;
             chkLooped.Checked = false;
 
-
+            cryImage?.Dispose();
+            cryImage = new Bitmap(1, 1);
+            pSample.Image = cryImage;
         }
     }
 }
