@@ -132,6 +132,13 @@ namespace Crying
             Close();
         }
 
+        private void playToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (cry.Offset == 0) return;
+
+            PlayCry();
+        }
+
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (cry.Offset == 0) return;
