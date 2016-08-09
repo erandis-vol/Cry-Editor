@@ -117,8 +117,10 @@ namespace Crying
         {
             if (rom == null || cry.Offset == 0) return;
 
-            SaveCry();
-            rom.Save();
+            if (SaveCry())
+                rom.Save();
+
+            DisplayCry();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -159,9 +161,8 @@ namespace Crying
             catch (Exception ex)
             {
                 MessageBox.Show($"error: {ex.Message}");
+                //ClearCry();
             }
-
-            ClearCry();
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -197,6 +198,13 @@ namespace Crying
 
             // cry loaded, output
             DisplayCry();
+        }
+
+        private void chkCompressed_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cry.Offset == 0) return;
+
+            cry.Compressed = chkCompressed.Checked;
         }
 
         int GetCryIndex(int pokemonIndex)
@@ -307,9 +315,9 @@ namespace Crying
             return true;
         }
 
-        void SaveCry()
+        bool SaveCry()
         {
-            if (rom == null || cry.Offset == 0) return;
+            if (rom == null || cry.Offset == 0) return false;
             //var lookup = new byte[] { 0x0, 0x1, 0x4, 0x9, 0x10, 0x19, 0x24, 0x31, 0xC0, 0xCF, 0xDC, 0xE7, 0xF0, 0xF7, 0xFC, 0xFF };
             var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
 
@@ -410,8 +418,22 @@ namespace Crying
             // determine if cry requires repointing
             if (cry.Size < data.Count)
             {
-                Console.WriteLine("repoint required");
-            //    return;
+                // find a new offset for our cry
+                using (var fsf = new FreeSpaceDialog(rom, "The cry needs to be repointed.", data.Count))
+                {
+                    if (fsf.ShowDialog() != DialogResult.OK)
+                        return false;
+
+                    // overwrite old cry with FF bytes
+                    rom.Seek(cry.Offset);
+                    for (int i = 0; i < 16; i++)        // header
+                        rom.WriteByte(byte.MaxValue);
+                    for (int i = 0; i < cry.Size; i++)  // cry data
+                        rom.WriteByte(byte.MaxValue);
+
+                    // set new cry offset
+                    cry.Offset = fsf.Offset;
+                }
             }
 
             // write cry
@@ -428,6 +450,7 @@ namespace Crying
             rom.WriteUInt32(cry.Compressed ? 0x00003C20u : 0x00003C00u);
             rom.WritePointer(cry.Offset);
             rom.WriteUInt32(0x00FF00FFu);
+            return true;
         }
 
         void ExportCry(string filename)

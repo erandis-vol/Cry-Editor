@@ -47,6 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cry.cs" />
+    <Compile Include="FreeSpaceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FreeSpaceDialog.Designer.cs">
+      <DependentUpon>FreeSpaceDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -58,6 +64,9 @@
     <Compile Include="ROM.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TextTable.cs" />
+    <EmbeddedResource Include="FreeSpaceDialog.resx">
+      <DependentUpon>FreeSpaceDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

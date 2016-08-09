@@ -219,6 +219,7 @@
             this.chkCompressed.TabIndex = 4;
             this.chkCompressed.Text = "Compressed";
             this.chkCompressed.UseVisualStyleBackColor = true;
+            this.chkCompressed.CheckedChanged += new System.EventHandler(this.chkCompressed_CheckedChanged);
             // 
             // chkLooped
             // 
