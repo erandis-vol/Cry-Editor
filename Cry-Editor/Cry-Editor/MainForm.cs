@@ -101,14 +101,21 @@ namespace Crying
                 // valid ROM opened, load all necessary data
                 {
                     // load Pokemon names
-                    var language = (roms.GetString(rom.Code, "Language") == "jap" ?
-                        CharacterEncoding.Japanese : CharacterEncoding.English);
-
                     var firstPokemonName = roms.GetInt32(rom.Code, "PokemonNames", 16);
                     rom.Seek(firstPokemonName);
 
                     listPokemon.Items.Clear();
-                    listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, language));
+                    switch (roms.GetString(rom.Code, "TextTable"))
+                    {
+                        case "jap":
+                            listPokemon.Items.AddRange(rom.ReadTextTable(6, pokemonCount, CharacterEncoding.Japanese));
+                            break;
+                        case "eng":
+                            listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, CharacterEncoding.English));
+                            break;
+                        default:
+                            throw new Exception($"Invalid TextTable for {rom.Code}!");
+                    }
                 }
 
                 // display ROM info
