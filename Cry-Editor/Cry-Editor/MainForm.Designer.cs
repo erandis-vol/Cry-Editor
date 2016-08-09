@@ -32,8 +32,6 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +40,23 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gROM = new System.Windows.Forms.GroupBox();
+            this.gCry = new System.Windows.Forms.GroupBox();
+            this.lROM = new System.Windows.Forms.Label();
+            this.lTable = new System.Windows.Forms.Label();
+            this.lOffset = new System.Windows.Forms.Label();
+            this.lSampleRate = new System.Windows.Forms.Label();
+            this.chkCompressed = new System.Windows.Forms.CheckBox();
+            this.chkLooped = new System.Windows.Forms.CheckBox();
+            this.listPokemon = new System.Windows.Forms.ListBox();
+            this.lSize = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.pSample = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
+            this.gROM.SuspendLayout();
+            this.gCry.SuspendLayout();
+            this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pSample)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -53,7 +67,7 @@
             this.cryToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(831, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(351, 28);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -79,25 +93,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 16;
-            this.listBox1.Location = new System.Drawing.Point(12, 31);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(259, 420);
-            this.listBox1.TabIndex = 1;
-            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Font = new System.Drawing.Font("Consolas", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox1.Location = new System.Drawing.Point(277, 31);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(542, 420);
-            this.richTextBox1.TabIndex = 2;
-            this.richTextBox1.Text = "";
             // 
             // closeToolStripMenuItem
             // 
@@ -148,13 +143,133 @@
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
+            // gROM
+            // 
+            this.gROM.Controls.Add(this.lROM);
+            this.gROM.Location = new System.Drawing.Point(12, 31);
+            this.gROM.Name = "gROM";
+            this.gROM.Size = new System.Drawing.Size(327, 100);
+            this.gROM.TabIndex = 1;
+            this.gROM.TabStop = false;
+            this.gROM.Text = "ROM";
+            // 
+            // gCry
+            // 
+            this.gCry.Controls.Add(this.panel1);
+            this.gCry.Controls.Add(this.lSize);
+            this.gCry.Controls.Add(this.listPokemon);
+            this.gCry.Controls.Add(this.chkLooped);
+            this.gCry.Controls.Add(this.chkCompressed);
+            this.gCry.Controls.Add(this.lSampleRate);
+            this.gCry.Controls.Add(this.lOffset);
+            this.gCry.Controls.Add(this.lTable);
+            this.gCry.Location = new System.Drawing.Point(12, 137);
+            this.gCry.Name = "gCry";
+            this.gCry.Size = new System.Drawing.Size(327, 393);
+            this.gCry.TabIndex = 2;
+            this.gCry.TabStop = false;
+            this.gCry.Text = "Cry";
+            // 
+            // lROM
+            // 
+            this.lROM.AutoSize = true;
+            this.lROM.Location = new System.Drawing.Point(6, 18);
+            this.lROM.Name = "lROM";
+            this.lROM.Size = new System.Drawing.Size(100, 17);
+            this.lROM.TabIndex = 0;
+            this.lROM.Text = "Load a ROM...";
+            // 
+            // lTable
+            // 
+            this.lTable.AutoSize = true;
+            this.lTable.Location = new System.Drawing.Point(6, 172);
+            this.lTable.Name = "lTable";
+            this.lTable.Size = new System.Drawing.Size(74, 17);
+            this.lTable.TabIndex = 1;
+            this.lTable.Text = "Table: 0x0";
+            // 
+            // lOffset
+            // 
+            this.lOffset.AutoSize = true;
+            this.lOffset.Location = new System.Drawing.Point(183, 172);
+            this.lOffset.Name = "lOffset";
+            this.lOffset.Size = new System.Drawing.Size(76, 17);
+            this.lOffset.TabIndex = 2;
+            this.lOffset.Text = "Offset: 0x0";
+            // 
+            // lSampleRate
+            // 
+            this.lSampleRate.AutoSize = true;
+            this.lSampleRate.Location = new System.Drawing.Point(6, 189);
+            this.lSampleRate.Name = "lSampleRate";
+            this.lSampleRate.Size = new System.Drawing.Size(126, 17);
+            this.lSampleRate.TabIndex = 3;
+            this.lSampleRate.Text = "Sample Rate: 0 Hz";
+            // 
+            // chkCompressed
+            // 
+            this.chkCompressed.AutoSize = true;
+            this.chkCompressed.Location = new System.Drawing.Point(9, 209);
+            this.chkCompressed.Name = "chkCompressed";
+            this.chkCompressed.Size = new System.Drawing.Size(109, 21);
+            this.chkCompressed.TabIndex = 4;
+            this.chkCompressed.Text = "Compressed";
+            this.chkCompressed.UseVisualStyleBackColor = true;
+            // 
+            // chkLooped
+            // 
+            this.chkLooped.AutoSize = true;
+            this.chkLooped.Enabled = false;
+            this.chkLooped.Location = new System.Drawing.Point(186, 209);
+            this.chkLooped.Name = "chkLooped";
+            this.chkLooped.Size = new System.Drawing.Size(78, 21);
+            this.chkLooped.TabIndex = 5;
+            this.chkLooped.Text = "Looped";
+            this.chkLooped.UseVisualStyleBackColor = true;
+            // 
+            // listPokemon
+            // 
+            this.listPokemon.FormattingEnabled = true;
+            this.listPokemon.ItemHeight = 16;
+            this.listPokemon.Location = new System.Drawing.Point(9, 21);
+            this.listPokemon.Name = "listPokemon";
+            this.listPokemon.Size = new System.Drawing.Size(309, 148);
+            this.listPokemon.TabIndex = 6;
+            this.listPokemon.SelectedIndexChanged += new System.EventHandler(this.listPokemon_SelectedIndexChanged);
+            // 
+            // lSize
+            // 
+            this.lSize.AutoSize = true;
+            this.lSize.Location = new System.Drawing.Point(183, 189);
+            this.lSize.Name = "lSize";
+            this.lSize.Size = new System.Drawing.Size(107, 17);
+            this.lSize.TabIndex = 4;
+            this.lSize.Text = "Size: 0 samples";
+            // 
+            // panel1
+            // 
+            this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.pSample);
+            this.panel1.Location = new System.Drawing.Point(9, 236);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(309, 151);
+            this.panel1.TabIndex = 7;
+            // 
+            // pSample
+            // 
+            this.pSample.Location = new System.Drawing.Point(0, 0);
+            this.pSample.Name = "pSample";
+            this.pSample.Size = new System.Drawing.Size(16, 128);
+            this.pSample.TabIndex = 0;
+            this.pSample.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(831, 463);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.listBox1);
+            this.ClientSize = new System.Drawing.Size(351, 542);
+            this.Controls.Add(this.gCry);
+            this.Controls.Add(this.gROM);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
@@ -163,6 +278,12 @@
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.gROM.ResumeLayout(false);
+            this.gROM.PerformLayout();
+            this.gCry.ResumeLayout(false);
+            this.gCry.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pSample)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -174,8 +295,6 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
@@ -184,6 +303,18 @@
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.GroupBox gROM;
+        private System.Windows.Forms.GroupBox gCry;
+        private System.Windows.Forms.Label lROM;
+        private System.Windows.Forms.Label lOffset;
+        private System.Windows.Forms.Label lTable;
+        private System.Windows.Forms.Label lSampleRate;
+        private System.Windows.Forms.CheckBox chkCompressed;
+        private System.Windows.Forms.CheckBox chkLooped;
+        private System.Windows.Forms.ListBox listPokemon;
+        private System.Windows.Forms.Label lSize;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.PictureBox pSample;
     }
 }
 

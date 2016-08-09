@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -95,12 +96,18 @@ namespace Crying
                 // valid ROM opened, load all necessary data
                 {
                     // load Pokemon names
-                    int firstPokemonName = roms.GetInt32(rom.Code, "PokemonNames", 16);
+                    var language = (roms.GetString(rom.Code, "Language") == "jap" ?
+                        CharacterEncoding.Japanese : CharacterEncoding.English);
+
+                    var firstPokemonName = roms.GetInt32(rom.Code, "PokemonNames", 16);
                     rom.Seek(firstPokemonName);
 
-                    listBox1.Items.Clear();
-                    listBox1.Items.AddRange(rom.ReadTextTable(11, pokemonCount));
+                    listPokemon.Items.Clear();
+                    listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, language));
                 }
+
+                // display ROM info
+                lROM.Text = $"Name: {rom.Name}\nCode: {rom.Code}\nCry Table: 0x{cryTable:X6}\nNumber of Pokémon: {pokemonCount}";
             }
         }
 
@@ -117,8 +124,7 @@ namespace Crying
             rom?.Dispose();
             rom = null;
 
-            listBox1.Items.Clear();
-            richTextBox1.Text = "";
+            listPokemon.Items.Clear();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -139,12 +145,14 @@ namespace Crying
             try
             {
                 ImportCry(openFileDialog1.FileName);
-                DisplayCry(cry.Index, listBox1.SelectedIndex);
+                DisplayCry();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"error: {ex.Message}");
             }
+
+            ClearCry();
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -160,18 +168,18 @@ namespace Crying
             ExportCry(saveFileDialog1.FileName);
         }
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void listPokemon_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (rom == null || rom.FilePath == string.Empty) return;
 
             // get pokemon index
-            int pokemonIndex = listBox1.SelectedIndex;
+            int pokemonIndex = listPokemon.SelectedIndex;
 
             // get cry index
             int tableIndex = GetCryIndex(pokemonIndex);
             if (tableIndex == -1)
             {
-                richTextBox1.Text = $"POKéMON {pokemonIndex}\nNO CRY";
+                ClearCry();
                 return;
             }
 
@@ -179,7 +187,7 @@ namespace Crying
             LoadCry(tableIndex);
 
             // cry loaded, output
-            DisplayCry(tableIndex, pokemonIndex);
+            DisplayCry();
         }
 
         int GetCryIndex(int pokemonIndex)
@@ -495,25 +503,74 @@ namespace Crying
             cry.LoopStart = 0;
         }
 
-        void DisplayCry(int tableIndex, int pokemonIndex)
+        void PlayCry()
         {
-            var sb = new StringBuilder();
+            // TODO: we could do this in another thread :O
+            if (cry.Offset == 0) return;
 
-            sb.AppendLine($"POKéMON {pokemonIndex}");
-            sb.AppendLine($"CRY {tableIndex}");
-            sb.AppendLine($"Offset: 0x{cry.Offset:X6}");
-            sb.AppendLine($"Sample Rate: {cry.SampleRate} Hz");
-            sb.AppendLine($"Original Size: {cry.Size}\n");
-
-            sb.AppendLine($"Data Length: {cry.Data.Length}");
-            sb.AppendLine("Data:");
-            foreach (var b in cry.Data)
+            using (var stream = new MemoryStream())
             {
-                sb.Append($"{b:X2} ");
-            }
-            sb.AppendLine();
+                // "save" the cry to a memorystream
+                using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
+                {
+                    // RIFF header
+                    writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+                    writer.Write(0);
+                    writer.Write(Encoding.ASCII.GetBytes("WAVE"));
 
-            richTextBox1.Text = sb.ToString();
+                    // fmt chunk
+                    writer.Write(Encoding.ASCII.GetBytes("fmt "));
+                    writer.Write(16);
+                    writer.Write((ushort)1);
+                    writer.Write((ushort)1);
+                    writer.Write(cry.SampleRate);
+                    writer.Write(cry.SampleRate);
+                    writer.Write((ushort)1);
+                    writer.Write((ushort)8);
+
+                    // data chunk
+                    writer.Write(Encoding.ASCII.GetBytes("data"));
+                    writer.Write(cry.Data.Length);
+                    foreach (var sample in cry.Data)
+                        writer.Write((byte)(sample + 0x80));
+
+                    // fix header
+                    writer.Seek(4, SeekOrigin.Begin);
+                    writer.Write((int)writer.BaseStream.Length - 8);
+                }
+
+                // play it via a soundplayer
+                stream.Seek(0L, SeekOrigin.Begin);
+                using (var player = new SoundPlayer(stream))
+                {
+                    player.Load();
+                    player.Play();
+                }
+            }
+        }
+
+        void DisplayCry()
+        {
+            lTable.Text = $"Table: 0x{(cryTable + cry.Index * 12):X6}";
+            lOffset.Text = $"Offset: 0x{cry.Offset:X6}";
+            lSampleRate.Text = $"Sample Rate: {cry.SampleRate} Hz";
+            lSize.Text = $"Size: {cry.Data.Length} samples";
+
+            chkCompressed.Checked = cry.Compressed;
+            chkLooped.Checked = cry.Looped;
+        }
+
+        void ClearCry()
+        {
+            lTable.Text = $"Table: 0x{0:X6}";
+            lOffset.Text = $"Offset: 0x{0:X6}";
+            lSampleRate.Text = "Sample Rate: 0 Hz";
+            lSize.Text = "Size: 0 samples";
+
+            chkCompressed.Checked = false;
+            chkLooped.Checked = false;
+
+
         }
     }
 }
