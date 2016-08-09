@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FreeSpaceDialog));
             this.lNeeded = new System.Windows.Forms.Label();
             this.lMessage = new System.Windows.Forms.Label();
             this.listOffsets = new System.Windows.Forms.ListBox();
@@ -127,6 +128,7 @@
             this.Controls.Add(this.lMessage);
             this.Controls.Add(this.lNeeded);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FreeSpaceDialog";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
