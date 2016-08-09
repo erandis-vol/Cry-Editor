@@ -295,7 +295,7 @@ namespace Crying
             var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
 
             // compressed cries are not allowed
-            cry.Compressed = false;
+            //cry.Compressed = false;
 
             // copy cry data to be written
             var data = new List<byte>();
@@ -305,6 +305,7 @@ namespace Crying
                 // first byte is normal signed PCM data
                 // following 0x20 bytes are compressed based on previous value
                 // (for a value not in lookup table, closest value will be chosen instead)
+                Console.WriteLine("compressed");
 
                 // each block has 0x40 samples
                 var blockCount = cry.Data.Length / 0x40;
@@ -328,27 +329,39 @@ namespace Crying
                         var sample = cry.Data[i++];
 
                         // difference between previous sample and this
-                        var diff = pcm - sample;
+                        var diff = sample - pcm;
 
-                        // TODO: ensure diff conforms to num^2 = diff
-
-                        // find closet match in lookup table
-                        int lookupV = 0;
+                        // check for a perfect match in lookup table
+                        var lookupI = -1;
                         for (int x = 0; x < 16; x++)
                         {
                             if (lookup[x] == diff)
                             {
-                                lookupV = x;
+                                lookupI = x;
                                 break;
+                            }
+                        }
+
+                        // search for the closest match in the table
+                        if (lookupI == -1)
+                        {   
+                            var bestDiff = 255;
+                            for (int x = 0; x < 16; x++)
+                            {
+                                if (Math.Abs(lookup[x] - diff) < bestDiff)
+                                {
+                                    lookupI = x;
+                                    bestDiff = Math.Abs(lookup[x] - diff);
+                                }
                             }
                         }
 
                         // set value in block
                         // on an odd value, increase position in block
                         if (j % 2 == 0)
-                            blocks[n][k] |= (byte)(lookupV << 4);
+                            blocks[n][k] |= (byte)(lookupI << 4);
                         else
-                            blocks[n][k++] |= (byte)lookupV;
+                            blocks[n][k++] |= (byte)lookupI;
 
                         // set previous
                         pcm = sample;
@@ -367,15 +380,15 @@ namespace Crying
             }
 
             // determine if cry requires repointing
-            //if (cry.Size < data.Count)
-            //{
-            //    Console.WriteLine("repoint required");
+            if (cry.Size < data.Count)
+            {
+                Console.WriteLine("repoint required");
             //    return;
-            //}
+            }
 
             // write cry
             rom.Seek(cry.Offset);
-            rom.WriteUInt16((ushort)(cry.Compressed ? 0 : 0));
+            rom.WriteUInt16((ushort)(cry.Compressed ? 1 : 0));
             rom.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0));
             rom.WriteInt32(cry.SampleRate << 10);
             rom.WriteInt32(cry.LoopStart);
