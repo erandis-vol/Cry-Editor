@@ -249,6 +249,7 @@ namespace Crying
             {
                 // compressed, a bit of a hassle
                 var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
+                var start = rom.Position;
 
                 int alignment = 0, size = 0;
                 sbyte pcmLevel = 0;
@@ -284,6 +285,7 @@ namespace Crying
                 }
 
                 cry.Data = data.ToArray();
+                cry.Size = rom.Position - start; // bytes needed to recompress
             }
             return true;
         }
@@ -294,9 +296,6 @@ namespace Crying
             //var lookup = new byte[] { 0x0, 0x1, 0x4, 0x9, 0x10, 0x19, 0x24, 0x31, 0xC0, 0xCF, 0xDC, 0xE7, 0xF0, 0xF7, 0xFC, 0xFF };
             var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
 
-            // compressed cries are not allowed
-            //cry.Compressed = false;
-
             // copy cry data to be written
             var data = new List<byte>();
             if (cry.Compressed)
@@ -305,17 +304,29 @@ namespace Crying
                 // first byte is normal signed PCM data
                 // following 0x20 bytes are compressed based on previous value
                 // (for a value not in lookup table, closest value will be chosen instead)
-                Console.WriteLine("compressed");
+                //Console.WriteLine("compressed");
 
                 // each block has 0x40 samples
                 var blockCount = cry.Data.Length / 0x40;
                 if (cry.Data.Length % 0x40 > 0) blockCount++;
 
+                // truncates the length of the last block
+                // so we don't waste space
+                var lastBlockSize = cry.Data.Length - cry.Data.Length / 0x40 * 0x40;
+                if (lastBlockSize == 0)
+                    lastBlockSize = 0x21;
+                else
+                    lastBlockSize = 1 + (lastBlockSize / 2);
+
                 var blocks = new byte[blockCount][];
                 for (int n = 0; n < blockCount; n++)
                 {
                     // create new block
-                    blocks[n] = new byte[0x21];
+                    if (n < blockCount - 1)
+                        blocks[n] = new byte[0x21];
+                    else
+                        blocks[n] = new byte[lastBlockSize];
+
                     int i = n * 0x40;
                     int k = 0;
 
@@ -374,7 +385,7 @@ namespace Crying
             else
             {
                 // uncompressed, copy directly to data
-                Console.WriteLine("uncompressed");
+                //Console.WriteLine("uncompressed");
                 foreach (var s in cry.Data)
                     data.Add((byte)s);
             }
@@ -492,7 +503,9 @@ namespace Crying
             sb.AppendLine($"CRY {tableIndex}");
             sb.AppendLine($"Offset: 0x{cry.Offset:X6}");
             sb.AppendLine($"Sample Rate: {cry.SampleRate} Hz");
+            sb.AppendLine($"Original Size: {cry.Size}\n");
 
+            sb.AppendLine($"Data Length: {cry.Data.Length}");
             sb.AppendLine("Data:");
             foreach (var b in cry.Data)
             {
