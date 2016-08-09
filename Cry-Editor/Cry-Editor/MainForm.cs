@@ -37,7 +37,9 @@ namespace Crying
         Settings roms;
 
         int pokemonCount;
-        int cryTable, hoennCryOrder;
+        int cryTable;
+        int growlTable;
+        int hoennCryOrder;
 
         Cry cry = new Cry();
         Bitmap cryImage;
@@ -93,6 +95,7 @@ namespace Crying
                 // get some basic info
                 pokemonCount = roms.GetInt32(rom.Code, "NumberOfPokemon", 10);
                 cryTable = roms.GetInt32(rom.Code, "CryData", 16);
+                growlTable = roms.GetInt32(rom.Code, "GrowlData", 16);
                 hoennCryOrder = roms.GetInt32(rom.Code, "HoennCryOrder", 16);
 
                 // valid ROM opened, load all necessary data
@@ -176,6 +179,13 @@ namespace Crying
 
             // TODO: support more formats
             ExportCry(saveFileDialog1.FileName);
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Cry Editor v1.0 (8/8/2016)\nCopyright (c) 2016 Lost" +
+                "\n\nA program to edit cries in 3rd generation Pokémon games.",
+                "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void listPokemon_SelectedIndexChanged(object sender, EventArgs e)
@@ -448,6 +458,12 @@ namespace Crying
             // write cry table entry
             rom.Seek(cryTable + cry.Index * 12);
             rom.WriteUInt32(cry.Compressed ? 0x00003C20u : 0x00003C00u);
+            rom.WritePointer(cry.Offset);
+            rom.WriteUInt32(0x00FF00FFu);
+
+            // write growl table entry
+            rom.Seek(growlTable + cry.Index * 12);
+            rom.WriteUInt32(cry.Compressed ? 0x00003C30u : 0x00003C00u); // !!! not sure if 00 should be used for uncompressed
             rom.WritePointer(cry.Offset);
             rom.WriteUInt32(0x00FF00FFu);
             return true;
