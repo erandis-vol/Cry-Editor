@@ -249,12 +249,22 @@ namespace Crying
             // calculate number of bytes needed to save this cry
             // length of data + 16 bytes for the header
             var neededBytes = data.Count + 16;
-            Console.WriteLine("original_size: {0}, new_size: {1}", cry.OriginalSize, neededBytes);
 
             // ------------------------------
             // determine if cry requires repointing
             if (neededBytes > cry.OriginalSize)
             {
+                // ------------------------------
+                // add a "freespace guard"
+                // 00 byte added to a cry that ends with FF
+                if (data[data.Count - 1] == 0xFF)
+                {
+                    Console.WriteLine("freespace guard added");
+
+                    data.Add(0x00);
+                    neededBytes++;
+                }
+
                 // ------------------------------
                 // find a new offset for our cry
                 using (var fsf = new FreeSpaceDialog(rom, "The cry needs to be repointed.", data.Count))
@@ -277,11 +287,11 @@ namespace Crying
             // ------------------------------
             // write cry
             rom.Seek(cry.Offset);
-            rom.WriteUInt16((ushort)(cry.Compressed ? 1 : 0));
-            rom.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0));
-            rom.WriteInt32(cry.SampleRate << 10);
-            rom.WriteInt32(cry.LoopStart);
-            rom.WriteInt32(cry.Data.Length - 1);
+            rom.WriteUInt16((ushort)(cry.Compressed ? 1 : 0));  //
+            rom.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0)); //
+            rom.WriteInt32(cry.SampleRate << 10);               // 
+            rom.WriteInt32(cry.LoopStart);                      // cries should always be 00
+            rom.WriteInt32(cry.Data.Length - 1);                // length of cry uncompressed - 1
             rom.WriteBytes(data.ToArray());
 
             // ------------------------------
@@ -335,51 +345,69 @@ namespace Crying
             }
         }
 
-        void ImportCry(string filename)
+        Tuple<int, string> ImportCry(string filename)
         {
-            if (cry.Offset == 0) return;
+            if (this.cry.Offset == 0)
+                return new Tuple<int, string>(0, "You haven't loaded a cry!");
+
+            // temporary cry
+            //var cry = new Cry();
 
             // load a wave file
             using (var reader = new BinaryReader(File.OpenRead(filename)))
             {
                 // read RIFF header
                 if (reader.ReadUInt32() != 0x46464952)
-                    throw new Exception("This is not a WAVE file!");
+                    return new Tuple<int, string>(0, "This is not a WAV file!");
                 if (reader.ReadInt32() + 8 != reader.BaseStream.Length)
-                    throw new Exception("Invalid file length!");
+                    return new Tuple<int, string>(0, "Invalid file length!");
                 if (reader.ReadUInt32() != 0x45564157)
-                    throw new Exception("This is not a WAVE file!");
+                    return new Tuple<int, string>(0, "This is not a WAV file!");
 
                 // read fmt chunk
                 if (reader.ReadUInt32() != 0x20746D66)
-                    throw new Exception("Expected fmt chunk!");
+                    return new Tuple<int, string>(0, "Expected fmt chunk!");
                 if (reader.ReadInt32() != 16)
-                    throw new Exception("Invalid fmt chunk!");
+                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
                 if (reader.ReadInt16() != 1)          // only PCM format allowed
-                    throw new Exception("Cry must be in PCM format!");
+                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
                 if (reader.ReadInt16() != 1)          // only 1 channel allowed
-                    throw new Exception("Cry cannot have more than one channel!");
-                cry.SampleRate = reader.ReadInt32();
-                if (reader.ReadInt32() != cry.SampleRate)
-                    throw new Exception("Invalid fmt chunk!");
+                    return new Tuple<int, string>(0, "WAB cannot have more than one channel!");
+                var sampleRate = reader.ReadInt32();
+                if (reader.ReadInt32() != sampleRate)
+                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
                 reader.ReadUInt16();
                 var bitsPerSample = reader.ReadUInt16();
                 if (bitsPerSample != 8)              // for now, only 8 bit PCM data
-                    throw new Exception($"Cries must be 8-bit WAVE files! Got {bitsPerSample}-bit instead.");
+                    return new Tuple<int, string>(0, $"WAV must be 8-bit PCM WAV files!\nGot {bitsPerSample}-bit instead.\nEnsure your file is an 8-bit PCM WAV file.");
 
                 // data chunk
                 if (reader.ReadUInt32() != 0x61746164)
-                    throw new Exception("Expected data chunk!!");
+                    return new Tuple<int, string>(0, "Expected data chunk, but got something else!\nYour WAV likely is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
                 var dataSize = reader.ReadInt32();
 
-                cry.Data = new sbyte[dataSize];
+                var data = new sbyte[dataSize];
                 for (int i = 0; i < dataSize; i++)  // read 8-bit unsigned PCM and convert to GBA signed form
-                    cry.Data[i] = (sbyte)(reader.ReadByte() - 128);
+                    data[i] = (sbyte)(reader.ReadByte() - 128);
+
+                // success, copy
+                cry.SampleRate = sampleRate;
+                cry.Data = data;
             }
 
             // resetting some other properties just in case
             cry.Looped = false;
             cry.LoopStart = 0;
+
+            // send the user warnings:
+            if (cry.SampleRate != ((cry.SampleRate << 10) >> 10))
+            {
+                cry.SampleRate = (cry.SampleRate << 10) >> 10;
+                return new Tuple<int, string>(1, "Your cry was imported correctly, but the sample rate was not suited for the GBA and will be altered a bit.");
+            }
+
+            // success, no message needed
+            return new Tuple<int, string>(2, string.Empty);
         }
 
         void PlayCry()

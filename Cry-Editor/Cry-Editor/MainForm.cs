@@ -151,22 +151,21 @@ namespace Crying
         {
             if (cry.Offset == 0) return;
 
+            openFileDialog1.FileName = "";
             openFileDialog1.Title = "Import Cry";
             openFileDialog1.Filter = "Wave Files|*.wav";
 
             if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
 
             // TODO: support more formats
-            try
-            {
-                ImportCry(openFileDialog1.FileName);
+            var result = ImportCry(openFileDialog1.FileName);
+            if (result.Item1 == 0)      // error
+                MessageBox.Show(result.Item2, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (result.Item1 == 1) // warning
+                MessageBox.Show(result.Item2, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            if (result.Item1 != 0)
                 DisplayCry();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"error: {ex.Message}");
-                //ClearCry();
-            }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)

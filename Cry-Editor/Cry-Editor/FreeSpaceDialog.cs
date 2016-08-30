@@ -12,8 +12,10 @@ namespace Crying
 {
     public partial class FreeSpaceDialog : Form
     {
+        const int MaximumSearchResults = 8;
+
         ROM rom;
-        int[] offsets = new int[8];
+        int[] offsets = new int[MaximumSearchResults];
         int offset;
 
         bool ignore;
@@ -79,6 +81,12 @@ namespace Crying
             try
             {
                 neededBytes = Convert.ToInt32(tNeeded.Text);
+            }
+            catch
+            { }
+
+            try
+            {
                 searchStart = Convert.ToInt32(tStart.Text, 16);
             }
             catch
@@ -86,19 +94,19 @@ namespace Crying
 
 
             // clear existing results
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < MaximumSearchResults; i++)
                 offsets[i] = 0;
 
-            // search up to 8 times
+            // search up to X times
             int size = 0;
-            for (;size < 8; size++)
+            while (size < MaximumSearchResults)
             {
                 var offset = rom.FindFreeSpace(neededBytes, startOffset: searchStart, alignment: 4);
                 if (offset == -1)
                     break;
 
-                offsets[size] = offset;
-                searchStart += neededBytes;
+                offsets[size++] = offset;
+                searchStart = offset + neededBytes;
             }
 
             // fill display
