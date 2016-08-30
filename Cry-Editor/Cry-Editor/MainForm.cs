@@ -193,22 +193,29 @@ namespace Crying
         {
             if (rom == null || rom.FilePath == string.Empty) return;
 
-            // get pokemon index
-            int pokemonIndex = listPokemon.SelectedIndex;
+            try
+            {
+                // get pokemon index
+                int pokemonIndex = listPokemon.SelectedIndex;
 
-            // get cry index
-            var tableIndex = GetCryIndex(pokemonIndex);
-            if (!tableIndex.Item2)
+                // get cry index
+                var tableIndex = GetCryIndex(pokemonIndex);
+                if (!tableIndex.Item2)
+                {
+                    ClearCry();
+                    return;
+                }
+
+                // load cry at index
+                LoadCry(tableIndex.Item1);
+
+                // cry loaded, output
+                DisplayCry();
+            }
+            catch
             {
                 ClearCry();
-                return;
             }
-
-            // load cry at index
-            LoadCry(tableIndex.Item1);
-
-            // cry loaded, output
-            DisplayCry();
         }
 
         private void chkCompressed_CheckedChanged(object sender, EventArgs e)

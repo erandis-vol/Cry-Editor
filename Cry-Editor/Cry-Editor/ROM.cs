@@ -153,15 +153,14 @@ namespace Crying
             // return on blank pointer
             if (ptr == 0) return 0;
 
-            // a pointer must be between 0x0 and 0x1FFFFFF to be valid on the GBA
-            // ROM pointer format is OFFSET | 0x8000000, so 0x8000000 <= POINTER <= 0x9FFFFFF
+            // a pointer must be between 0x0 and 0x1FFFFFF to be valid ROM bank 1 pointer
+            // bank 1 is 0x08-0x09, so 0x8000000 <= POINTER <= 0x9FFFFFF
             if (ptr < 0x8000000 || ptr > 0x9FFFFFF) throw new Exception(string.Format("Bad pointer at 0x{0:X6}", pos - 4));
 
             // easy way to extract
             return ptr & 0x1FFFFFF;
         }
 
-        // read a GBA string
         public string ReadText(int length, CharacterEncoding encoding = CharacterEncoding.English)
         {
             return TextTable.GetString(ReadBytes(length), encoding);
@@ -175,8 +174,6 @@ namespace Crying
 
             return table;
         }
-
-
 
         #endregion
 
@@ -345,16 +342,16 @@ namespace Crying
 
         void OnSourceFileChanged(object sender, FileSystemEventArgs e)
         {
-            Console.WriteLine($"ROM {e.FullPath} changed {e.ChangeType}.");
-            if (ignoreChange)
-            {
-                ignoreChange = false;
-                return;
-            }
-
             if (e.FullPath == filePath)
             {
-                Console.WriteLine("Reloading buffer...");
+                // ignore the source file changing if we caused it
+                if (ignoreChange)
+                {
+                    ignoreChange = false;
+                    return;
+                }
+
+                // otherwise reload buffer
                 using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     if (buffer.Length != fs.Length)
@@ -367,8 +364,7 @@ namespace Crying
 
         void OnSourceFileRenamed(object sender, RenamedEventArgs e)
         {
-            Console.WriteLine($"{e.OldFullPath} renamed to {e.FullPath}!");
-
+            // source ROM file was renamed, track the change
             if (e.OldFullPath == filePath)
             {
                 filePath = e.FullPath;
