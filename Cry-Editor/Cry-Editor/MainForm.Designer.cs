@@ -146,20 +146,20 @@
             this.playToolStripMenuItem.Image = global::Crying.Properties.Resources.sound;
             this.playToolStripMenuItem.Name = "playToolStripMenuItem";
             this.playToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.playToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.playToolStripMenuItem.Size = new System.Drawing.Size(156, 26);
             this.playToolStripMenuItem.Text = "Play";
             this.playToolStripMenuItem.Click += new System.EventHandler(this.playToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(144, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(153, 6);
             // 
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
             this.importToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(156, 26);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
@@ -167,7 +167,7 @@
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             this.exportToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(156, 26);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
@@ -191,11 +191,13 @@
             // 
             // gROM
             // 
+            this.gROM.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gROM.Controls.Add(this.lROM);
             this.gROM.Location = new System.Drawing.Point(9, 25);
-            this.gROM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gROM.Margin = new System.Windows.Forms.Padding(2);
             this.gROM.Name = "gROM";
-            this.gROM.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gROM.Padding = new System.Windows.Forms.Padding(2);
             this.gROM.Size = new System.Drawing.Size(245, 81);
             this.gROM.TabIndex = 1;
             this.gROM.TabStop = false;
@@ -213,6 +215,9 @@
             // 
             // gCry
             // 
+            this.gCry.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gCry.Controls.Add(this.panel1);
             this.gCry.Controls.Add(this.lSize);
             this.gCry.Controls.Add(this.listPokemon);
@@ -222,28 +227,31 @@
             this.gCry.Controls.Add(this.lOffset);
             this.gCry.Controls.Add(this.lTable);
             this.gCry.Location = new System.Drawing.Point(9, 111);
-            this.gCry.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gCry.Margin = new System.Windows.Forms.Padding(2);
             this.gCry.Name = "gCry";
-            this.gCry.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.gCry.Size = new System.Drawing.Size(245, 377);
+            this.gCry.Padding = new System.Windows.Forms.Padding(2);
+            this.gCry.Size = new System.Drawing.Size(245, 344);
             this.gCry.TabIndex = 2;
             this.gCry.TabStop = false;
             this.gCry.Text = "Cry";
             // 
             // panel1
             // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoScroll = true;
             this.panel1.Controls.Add(this.pSample);
             this.panel1.Location = new System.Drawing.Point(7, 192);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(232, 180);
+            this.panel1.Size = new System.Drawing.Size(232, 147);
             this.panel1.TabIndex = 7;
             // 
             // pSample
             // 
             this.pSample.Location = new System.Drawing.Point(0, 0);
-            this.pSample.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pSample.Margin = new System.Windows.Forms.Padding(2);
             this.pSample.Name = "pSample";
             this.pSample.Size = new System.Drawing.Size(16, 16);
             this.pSample.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -252,6 +260,7 @@
             // 
             // lSize
             // 
+            this.lSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lSize.AutoSize = true;
             this.lSize.Location = new System.Drawing.Point(137, 154);
             this.lSize.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
@@ -262,9 +271,11 @@
             // 
             // listPokemon
             // 
+            this.listPokemon.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listPokemon.FormattingEnabled = true;
             this.listPokemon.Location = new System.Drawing.Point(7, 17);
-            this.listPokemon.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listPokemon.Margin = new System.Windows.Forms.Padding(2);
             this.listPokemon.Name = "listPokemon";
             this.listPokemon.Size = new System.Drawing.Size(233, 121);
             this.listPokemon.TabIndex = 6;
@@ -272,10 +283,11 @@
             // 
             // chkLooped
             // 
+            this.chkLooped.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkLooped.AutoSize = true;
             this.chkLooped.Enabled = false;
             this.chkLooped.Location = new System.Drawing.Point(140, 170);
-            this.chkLooped.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.chkLooped.Margin = new System.Windows.Forms.Padding(2);
             this.chkLooped.Name = "chkLooped";
             this.chkLooped.Size = new System.Drawing.Size(62, 17);
             this.chkLooped.TabIndex = 5;
@@ -286,7 +298,7 @@
             // 
             this.chkCompressed.AutoSize = true;
             this.chkCompressed.Location = new System.Drawing.Point(7, 170);
-            this.chkCompressed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.chkCompressed.Margin = new System.Windows.Forms.Padding(2);
             this.chkCompressed.Name = "chkCompressed";
             this.chkCompressed.Size = new System.Drawing.Size(84, 17);
             this.chkCompressed.TabIndex = 4;
@@ -306,6 +318,7 @@
             // 
             // lOffset
             // 
+            this.lOffset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lOffset.AutoSize = true;
             this.lOffset.Location = new System.Drawing.Point(137, 140);
             this.lOffset.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
@@ -328,14 +341,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(263, 498);
+            this.ClientSize = new System.Drawing.Size(263, 465);
             this.Controls.Add(this.gCry);
             this.Controls.Add(this.gROM);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

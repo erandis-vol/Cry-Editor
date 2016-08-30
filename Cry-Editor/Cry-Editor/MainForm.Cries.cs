@@ -82,8 +82,8 @@ namespace Crying
             {
                 // ------------------------------
                 // uncompressed, 1 sample per 1 byte of size
-                cry.Data = new sbyte[cry.OriginalSize];
-                for (int i = 0; i < cry.OriginalSize; i++)
+                cry.Data = new sbyte[originalSize];
+                for (int i = 0; i < originalSize; i++)
                     cry.Data[i] = rom.ReadSByte();
             }
             else
@@ -468,13 +468,24 @@ namespace Crying
 
             // draw the cry
             cryImage?.Dispose();
-            cryImage = new Bitmap(cry.Data.Length, 128);
+            cryImage = new Bitmap(cry.Data.Length + 1, 129);
 
             using (var g = Graphics.FromImage(cryImage))
             {
+                g.DrawLine(SystemPens.ControlLight, 0, 0, cry.Data.Length, 0);
+                g.DrawLine(SystemPens.ControlLight, 0, 32, cry.Data.Length, 32);
+                g.DrawLine(SystemPens.ControlLight, 0, 64, cry.Data.Length, 64);
+                g.DrawLine(SystemPens.ControlLight, 0, 96, cry.Data.Length, 96);
+                g.DrawLine(SystemPens.ControlLight, 0, 128, cry.Data.Length, 128);
+
+                for (int i = 0; i < cry.Data.Length / 32 + 1; i++)
+                {
+                    g.DrawLine(SystemPens.ControlLight, i * 32, 0, i * 32, 128);
+                }
+
                 for (int i = 1; i < cry.Data.Length; i++)
                 {
-                    g.DrawLine(Pens.Green, i - 1, 64 + cry.Data[i - 1], i, 64 + cry.Data[i]);
+                    g.DrawLine(Pens.Red, i - 1, 64 + (cry.Data[i - 1] / 2), i, 64 + (cry.Data[i] / 2));
                 }
             }
 
