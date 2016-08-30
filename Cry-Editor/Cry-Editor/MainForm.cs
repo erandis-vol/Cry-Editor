@@ -166,7 +166,10 @@ namespace Crying
                 MessageBox.Show(result.Item2, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
             if (result.Item1 != 0)
+            {
                 DisplayCry();
+                gCry.Text = "Cry*";
+            }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -212,8 +215,9 @@ namespace Crying
                 // cry loaded, output
                 DisplayCry();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine("e {0} {1}", ex.Message, ex.StackTrace);
                 ClearCry();
             }
         }

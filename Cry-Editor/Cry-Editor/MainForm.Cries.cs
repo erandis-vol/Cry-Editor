@@ -69,6 +69,7 @@ namespace Crying
             // ------------------------------
             // load cry data
             rom.Seek(cryOffset);
+            var start = rom.Position;
 
             cry.Offset = cryOffset;
             cry.Index = index;
@@ -128,7 +129,7 @@ namespace Crying
                 cry.Data = data.ToArray();
             }
 
-            cry.OriginalSize = rom.Position - cryOffset; // total bytes used by the cry originally
+            cry.OriginalSize = rom.Position - start; // total bytes used by the cry originally
             return true;
         }
 
@@ -259,8 +260,6 @@ namespace Crying
                 // 00 byte added to a cry that ends with FF
                 if (data[data.Count - 1] == 0xFF)
                 {
-                    Console.WriteLine("freespace guard added");
-
                     data.Add(0x00);
                     neededBytes++;
                 }
@@ -275,7 +274,7 @@ namespace Crying
                     // ------------------------------
                     // overwrite old cry with FF bytes
                     rom.Seek(cry.Offset);
-                    for (int i = 0; i < cry.OriginalSize; i++)  // cry data
+                    for (int i = 0; i < cry.OriginalSize - 1; i++)
                         rom.WriteByte(byte.MaxValue);
 
                     // ------------------------------
@@ -462,6 +461,7 @@ namespace Crying
             lOffset.Text = $"Offset: 0x{cry.Offset:X6}";
             lSampleRate.Text = $"Sample Rate: {cry.SampleRate} Hz";
             lSize.Text = $"Size: {cry.Data.Length} samples";
+            gCry.Text = "Cry";
 
             chkCompressed.Checked = cry.Compressed;
             chkLooped.Checked = cry.Looped;
@@ -503,6 +503,7 @@ namespace Crying
             lOffset.Text = $"Offset: 0x{0:X6}";
             lSampleRate.Text = "Sample Rate: 0 Hz";
             lSize.Text = "Size: 0 samples";
+            gCry.Text = "Cry";
 
             chkCompressed.Checked = false;
             chkLooped.Checked = false;
