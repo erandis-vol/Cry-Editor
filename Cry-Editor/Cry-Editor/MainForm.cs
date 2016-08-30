@@ -36,13 +36,6 @@ namespace Crying
         ROM rom;
         Settings roms;
 
-        int pokemonCount;
-        int cryTable;
-        int growlTable;
-        int hoennCryOrder;
-
-        Bitmap cryImage;
-
         public MainForm()
         {
             InitializeComponent();
@@ -60,6 +53,9 @@ namespace Crying
                 MessageBox.Show("Unable to load ROMs.ini!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
+
+            // on success, prepare
+            ClearCry();
         }
         
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -201,15 +197,15 @@ namespace Crying
             int pokemonIndex = listPokemon.SelectedIndex;
 
             // get cry index
-            int tableIndex = GetCryIndex(pokemonIndex);
-            if (tableIndex == -1)
+            var tableIndex = GetCryIndex(pokemonIndex);
+            if (!tableIndex.Item2)
             {
                 ClearCry();
                 return;
             }
 
             // load cry at index
-            LoadCry(tableIndex);
+            LoadCry(tableIndex.Item1);
 
             // cry loaded, output
             DisplayCry();

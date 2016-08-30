@@ -12,10 +12,17 @@ namespace Crying
     {
         Cry cry = new Cry();
 
-        int GetCryIndex(int pokemonIndex)
+        int pokemonCount;
+        int cryTable;
+        int growlTable;
+        int hoennCryOrder;
+
+        Bitmap cryImage;
+
+        Tuple<int, bool> GetCryIndex(int pokemonIndex)
         {
             if (pokemonIndex == 0)
-                return -1;
+                return new Tuple<int, bool>(-1, false);
 
             // get table index
             int tableIndex = pokemonIndex - 1;
@@ -31,7 +38,7 @@ namespace Crying
             if (pokemonIndex > 251 && pokemonIndex < 277)
             {
                 //tableIndex = 387 + (pokemonIndex - 251);
-                return -1;
+                return new Tuple<int, bool>(-1, false); ;
             }
 
             // pokemon beyond Chimecho skip the ???/Unown slots
@@ -41,7 +48,7 @@ namespace Crying
                 // TODO: someone needs to tell me if this works
             }
 
-            return tableIndex;
+            return new Tuple<int, bool>(tableIndex, true);
         }
 
         bool LoadCry(int index)
@@ -67,7 +74,6 @@ namespace Crying
             cry.Looped = rom.ReadUInt16() == 0x4000;
             cry.SampleRate = rom.ReadInt32() >> 10;
             cry.LoopStart = rom.ReadInt32();
-            //cry.OriginalSize = rom.ReadInt32() + 1;
             var originalSize = rom.ReadInt32() + 1;
 
             if (!cry.Compressed)
@@ -81,7 +87,6 @@ namespace Crying
             {
                 // compressed, a bit of a hassle
                 var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
-                
 
                 int alignment = 0, size = 0;
                 sbyte pcmLevel = 0;
@@ -111,7 +116,7 @@ namespace Crying
 
                     // exit when currentSize >= cry.Size
                     size += 2;
-                    if (size >= cry.OriginalSize) break;
+                    if (size >= originalSize) break;
 
                     alignment--;
                 }
@@ -418,6 +423,11 @@ namespace Crying
             }
 
             pSample.Image = cryImage;
+
+            playToolStripMenuItem.Enabled = true;
+            importToolStripMenuItem.Enabled = true;
+            exportToolStripMenuItem.Enabled = true;
+            saveToolStripMenuItem.Enabled = true;
         }
 
         void ClearCry()
@@ -433,6 +443,11 @@ namespace Crying
             cryImage?.Dispose();
             cryImage = new Bitmap(1, 1);
             pSample.Image = cryImage;
+
+            playToolStripMenuItem.Enabled = false;
+            importToolStripMenuItem.Enabled = false;
+            exportToolStripMenuItem.Enabled = false;
+            saveToolStripMenuItem.Enabled = false;
         }
     }
 }
