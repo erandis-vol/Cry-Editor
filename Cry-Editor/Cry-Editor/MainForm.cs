@@ -41,7 +41,6 @@ namespace Crying
         int growlTable;
         int hoennCryOrder;
 
-        Cry cry = new Cry();
         Bitmap cryImage;
 
         public MainForm()

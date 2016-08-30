@@ -31,32 +31,32 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.cryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.gROM = new System.Windows.Forms.GroupBox();
-            this.gCry = new System.Windows.Forms.GroupBox();
-            this.lROM = new System.Windows.Forms.Label();
-            this.lTable = new System.Windows.Forms.Label();
-            this.lOffset = new System.Windows.Forms.Label();
-            this.lSampleRate = new System.Windows.Forms.Label();
-            this.chkCompressed = new System.Windows.Forms.CheckBox();
-            this.chkLooped = new System.Windows.Forms.CheckBox();
-            this.listPokemon = new System.Windows.Forms.ListBox();
-            this.lSize = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pSample = new System.Windows.Forms.PictureBox();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.gROM = new System.Windows.Forms.GroupBox();
+            this.lROM = new System.Windows.Forms.Label();
+            this.gCry = new System.Windows.Forms.GroupBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.pSample = new System.Windows.Forms.PictureBox();
+            this.lSize = new System.Windows.Forms.Label();
+            this.listPokemon = new System.Windows.Forms.ListBox();
+            this.chkLooped = new System.Windows.Forms.CheckBox();
+            this.chkCompressed = new System.Windows.Forms.CheckBox();
+            this.lSampleRate = new System.Windows.Forms.Label();
+            this.lOffset = new System.Windows.Forms.Label();
+            this.lTable = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.gROM.SuspendLayout();
             this.gCry.SuspendLayout();
@@ -73,7 +73,8 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(351, 28);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(263, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -86,25 +87,48 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
-            // openFileDialog1
+            // openToolStripMenuItem
             // 
-            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openToolStripMenuItem.Image = global::Crying.Properties.Resources.folder;
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Image = global::Crying.Properties.Resources.disk;
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
             this.closeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(145, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Image = global::Crying.Properties.Resources.cross;
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // cryToolStripMenuItem
             // 
@@ -114,14 +138,28 @@
             this.importToolStripMenuItem,
             this.exportToolStripMenuItem});
             this.cryToolStripMenuItem.Name = "cryToolStripMenuItem";
-            this.cryToolStripMenuItem.Size = new System.Drawing.Size(42, 24);
+            this.cryToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.cryToolStripMenuItem.Text = "Cry";
+            // 
+            // playToolStripMenuItem
+            // 
+            this.playToolStripMenuItem.Image = global::Crying.Properties.Resources.sound;
+            this.playToolStripMenuItem.Name = "playToolStripMenuItem";
+            this.playToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.playToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.playToolStripMenuItem.Text = "Play";
+            this.playToolStripMenuItem.Click += new System.EventHandler(this.playToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(144, 6);
             // 
             // importToolStripMenuItem
             // 
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
             this.importToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.importToolStripMenuItem.Text = "Import";
             this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
@@ -129,19 +167,49 @@
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             this.exportToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Image = global::Crying.Properties.Resources.information;
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.A)));
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // gROM
             // 
             this.gROM.Controls.Add(this.lROM);
-            this.gROM.Location = new System.Drawing.Point(12, 31);
+            this.gROM.Location = new System.Drawing.Point(9, 25);
+            this.gROM.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.gROM.Name = "gROM";
-            this.gROM.Size = new System.Drawing.Size(327, 100);
+            this.gROM.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gROM.Size = new System.Drawing.Size(245, 81);
             this.gROM.TabIndex = 1;
             this.gROM.TabStop = false;
             this.gROM.Text = "ROM";
+            // 
+            // lROM
+            // 
+            this.lROM.AutoSize = true;
+            this.lROM.Location = new System.Drawing.Point(4, 15);
+            this.lROM.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lROM.Name = "lROM";
+            this.lROM.Size = new System.Drawing.Size(77, 13);
+            this.lROM.TabIndex = 0;
+            this.lROM.Text = "Load a ROM...";
             // 
             // gCry
             // 
@@ -153,178 +221,121 @@
             this.gCry.Controls.Add(this.lSampleRate);
             this.gCry.Controls.Add(this.lOffset);
             this.gCry.Controls.Add(this.lTable);
-            this.gCry.Location = new System.Drawing.Point(12, 137);
+            this.gCry.Location = new System.Drawing.Point(9, 111);
+            this.gCry.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.gCry.Name = "gCry";
-            this.gCry.Size = new System.Drawing.Size(327, 464);
+            this.gCry.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.gCry.Size = new System.Drawing.Size(245, 377);
             this.gCry.TabIndex = 2;
             this.gCry.TabStop = false;
             this.gCry.Text = "Cry";
-            // 
-            // lROM
-            // 
-            this.lROM.AutoSize = true;
-            this.lROM.Location = new System.Drawing.Point(6, 18);
-            this.lROM.Name = "lROM";
-            this.lROM.Size = new System.Drawing.Size(100, 17);
-            this.lROM.TabIndex = 0;
-            this.lROM.Text = "Load a ROM...";
-            // 
-            // lTable
-            // 
-            this.lTable.AutoSize = true;
-            this.lTable.Location = new System.Drawing.Point(6, 172);
-            this.lTable.Name = "lTable";
-            this.lTable.Size = new System.Drawing.Size(74, 17);
-            this.lTable.TabIndex = 1;
-            this.lTable.Text = "Table: 0x0";
-            // 
-            // lOffset
-            // 
-            this.lOffset.AutoSize = true;
-            this.lOffset.Location = new System.Drawing.Point(183, 172);
-            this.lOffset.Name = "lOffset";
-            this.lOffset.Size = new System.Drawing.Size(76, 17);
-            this.lOffset.TabIndex = 2;
-            this.lOffset.Text = "Offset: 0x0";
-            // 
-            // lSampleRate
-            // 
-            this.lSampleRate.AutoSize = true;
-            this.lSampleRate.Location = new System.Drawing.Point(6, 189);
-            this.lSampleRate.Name = "lSampleRate";
-            this.lSampleRate.Size = new System.Drawing.Size(126, 17);
-            this.lSampleRate.TabIndex = 3;
-            this.lSampleRate.Text = "Sample Rate: 0 Hz";
-            // 
-            // chkCompressed
-            // 
-            this.chkCompressed.AutoSize = true;
-            this.chkCompressed.Location = new System.Drawing.Point(9, 209);
-            this.chkCompressed.Name = "chkCompressed";
-            this.chkCompressed.Size = new System.Drawing.Size(109, 21);
-            this.chkCompressed.TabIndex = 4;
-            this.chkCompressed.Text = "Compressed";
-            this.chkCompressed.UseVisualStyleBackColor = true;
-            this.chkCompressed.CheckedChanged += new System.EventHandler(this.chkCompressed_CheckedChanged);
-            // 
-            // chkLooped
-            // 
-            this.chkLooped.AutoSize = true;
-            this.chkLooped.Enabled = false;
-            this.chkLooped.Location = new System.Drawing.Point(186, 209);
-            this.chkLooped.Name = "chkLooped";
-            this.chkLooped.Size = new System.Drawing.Size(78, 21);
-            this.chkLooped.TabIndex = 5;
-            this.chkLooped.Text = "Looped";
-            this.chkLooped.UseVisualStyleBackColor = true;
-            // 
-            // listPokemon
-            // 
-            this.listPokemon.FormattingEnabled = true;
-            this.listPokemon.ItemHeight = 16;
-            this.listPokemon.Location = new System.Drawing.Point(9, 21);
-            this.listPokemon.Name = "listPokemon";
-            this.listPokemon.Size = new System.Drawing.Size(309, 148);
-            this.listPokemon.TabIndex = 6;
-            this.listPokemon.SelectedIndexChanged += new System.EventHandler(this.listPokemon_SelectedIndexChanged);
-            // 
-            // lSize
-            // 
-            this.lSize.AutoSize = true;
-            this.lSize.Location = new System.Drawing.Point(183, 189);
-            this.lSize.Name = "lSize";
-            this.lSize.Size = new System.Drawing.Size(107, 17);
-            this.lSize.TabIndex = 4;
-            this.lSize.Text = "Size: 0 samples";
             // 
             // panel1
             // 
             this.panel1.AutoScroll = true;
             this.panel1.Controls.Add(this.pSample);
-            this.panel1.Location = new System.Drawing.Point(9, 236);
+            this.panel1.Location = new System.Drawing.Point(7, 192);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(309, 222);
+            this.panel1.Size = new System.Drawing.Size(232, 180);
             this.panel1.TabIndex = 7;
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(178, 6);
-            // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.aboutToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(53, 24);
-            this.helpToolStripMenuItem.Text = "Help";
             // 
             // pSample
             // 
             this.pSample.Location = new System.Drawing.Point(0, 0);
+            this.pSample.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pSample.Name = "pSample";
             this.pSample.Size = new System.Drawing.Size(16, 16);
             this.pSample.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.pSample.TabIndex = 0;
             this.pSample.TabStop = false;
             // 
-            // openToolStripMenuItem
+            // lSize
             // 
-            this.openToolStripMenuItem.Image = global::Crying.Properties.Resources.folder;
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.openToolStripMenuItem.Text = "Open";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            this.lSize.AutoSize = true;
+            this.lSize.Location = new System.Drawing.Point(137, 154);
+            this.lSize.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lSize.Name = "lSize";
+            this.lSize.Size = new System.Drawing.Size(80, 13);
+            this.lSize.TabIndex = 4;
+            this.lSize.Text = "Size: 0 samples";
             // 
-            // saveToolStripMenuItem
+            // listPokemon
             // 
-            this.saveToolStripMenuItem.Image = global::Crying.Properties.Resources.disk;
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.listPokemon.FormattingEnabled = true;
+            this.listPokemon.Location = new System.Drawing.Point(7, 17);
+            this.listPokemon.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listPokemon.Name = "listPokemon";
+            this.listPokemon.Size = new System.Drawing.Size(233, 121);
+            this.listPokemon.TabIndex = 6;
+            this.listPokemon.SelectedIndexChanged += new System.EventHandler(this.listPokemon_SelectedIndexChanged);
             // 
-            // exitToolStripMenuItem
+            // chkLooped
             // 
-            this.exitToolStripMenuItem.Image = global::Crying.Properties.Resources.cross;
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.chkLooped.AutoSize = true;
+            this.chkLooped.Enabled = false;
+            this.chkLooped.Location = new System.Drawing.Point(140, 170);
+            this.chkLooped.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.chkLooped.Name = "chkLooped";
+            this.chkLooped.Size = new System.Drawing.Size(62, 17);
+            this.chkLooped.TabIndex = 5;
+            this.chkLooped.Text = "Looped";
+            this.chkLooped.UseVisualStyleBackColor = true;
             // 
-            // playToolStripMenuItem
+            // chkCompressed
             // 
-            this.playToolStripMenuItem.Image = global::Crying.Properties.Resources.sound;
-            this.playToolStripMenuItem.Name = "playToolStripMenuItem";
-            this.playToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.playToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.playToolStripMenuItem.Text = "Play";
-            this.playToolStripMenuItem.Click += new System.EventHandler(this.playToolStripMenuItem_Click);
+            this.chkCompressed.AutoSize = true;
+            this.chkCompressed.Location = new System.Drawing.Point(7, 170);
+            this.chkCompressed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.chkCompressed.Name = "chkCompressed";
+            this.chkCompressed.Size = new System.Drawing.Size(84, 17);
+            this.chkCompressed.TabIndex = 4;
+            this.chkCompressed.Text = "Compressed";
+            this.chkCompressed.UseVisualStyleBackColor = true;
+            this.chkCompressed.CheckedChanged += new System.EventHandler(this.chkCompressed_CheckedChanged);
             // 
-            // aboutToolStripMenuItem
+            // lSampleRate
             // 
-            this.aboutToolStripMenuItem.Image = global::Crying.Properties.Resources.information;
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.A)));
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(217, 26);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            this.lSampleRate.AutoSize = true;
+            this.lSampleRate.Location = new System.Drawing.Point(4, 154);
+            this.lSampleRate.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lSampleRate.Name = "lSampleRate";
+            this.lSampleRate.Size = new System.Drawing.Size(96, 13);
+            this.lSampleRate.TabIndex = 3;
+            this.lSampleRate.Text = "Sample Rate: 0 Hz";
+            // 
+            // lOffset
+            // 
+            this.lOffset.AutoSize = true;
+            this.lOffset.Location = new System.Drawing.Point(137, 140);
+            this.lOffset.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lOffset.Name = "lOffset";
+            this.lOffset.Size = new System.Drawing.Size(58, 13);
+            this.lOffset.TabIndex = 2;
+            this.lOffset.Text = "Offset: 0x0";
+            // 
+            // lTable
+            // 
+            this.lTable.AutoSize = true;
+            this.lTable.Location = new System.Drawing.Point(4, 140);
+            this.lTable.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lTable.Name = "lTable";
+            this.lTable.Size = new System.Drawing.Size(57, 13);
+            this.lTable.TabIndex = 1;
+            this.lTable.Text = "Table: 0x0";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(351, 613);
+            this.ClientSize = new System.Drawing.Size(263, 498);
             this.Controls.Add(this.gCry);
             this.Controls.Add(this.gROM);
             this.Controls.Add(this.menuStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

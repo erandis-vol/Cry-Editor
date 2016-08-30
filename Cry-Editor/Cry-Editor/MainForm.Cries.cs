@@ -10,6 +10,8 @@ namespace Crying
 {
     partial class MainForm
     {
+        Cry cry = new Cry();
+
         int GetCryIndex(int pokemonIndex)
         {
             if (pokemonIndex == 0)
@@ -36,6 +38,7 @@ namespace Crying
             if (pokemonIndex > 411)
             {
                 //tableIndex += 24;
+                // TODO: someone needs to tell me if this works
             }
 
             return tableIndex;
@@ -64,20 +67,21 @@ namespace Crying
             cry.Looped = rom.ReadUInt16() == 0x4000;
             cry.SampleRate = rom.ReadInt32() >> 10;
             cry.LoopStart = rom.ReadInt32();
-            cry.Size = rom.ReadInt32() + 1;
+            //cry.OriginalSize = rom.ReadInt32() + 1;
+            var originalSize = rom.ReadInt32() + 1;
 
             if (!cry.Compressed)
             {
                 // uncompressed, 1 sample per 1 byte of size
-                cry.Data = new sbyte[cry.Size];
-                for (int i = 0; i < cry.Size; i++)
+                cry.Data = new sbyte[cry.OriginalSize];
+                for (int i = 0; i < cry.OriginalSize; i++)
                     cry.Data[i] = rom.ReadSByte();
             }
             else
             {
                 // compressed, a bit of a hassle
                 var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
-                var start = rom.Position;
+                
 
                 int alignment = 0, size = 0;
                 sbyte pcmLevel = 0;
@@ -107,14 +111,15 @@ namespace Crying
 
                     // exit when currentSize >= cry.Size
                     size += 2;
-                    if (size >= cry.Size) break;
+                    if (size >= cry.OriginalSize) break;
 
                     alignment--;
                 }
 
                 cry.Data = data.ToArray();
-                cry.Size = rom.Position - start; // bytes needed to recompress
             }
+
+            cry.OriginalSize = rom.Position - cryOffset; // total bytes used by the cry originally
             return true;
         }
 
@@ -219,7 +224,7 @@ namespace Crying
             }
 
             // determine if cry requires repointing
-            if (cry.Size < data.Count)
+            if (cry.OriginalSize < data.Count)
             {
                 // find a new offset for our cry
                 using (var fsf = new FreeSpaceDialog(rom, "The cry needs to be repointed.", data.Count))
@@ -231,7 +236,7 @@ namespace Crying
                     rom.Seek(cry.Offset);
                     for (int i = 0; i < 16; i++)        // header
                         rom.WriteByte(byte.MaxValue);
-                    for (int i = 0; i < cry.Size; i++)  // cry data
+                    for (int i = 0; i < cry.OriginalSize; i++)  // cry data
                         rom.WriteByte(byte.MaxValue);
 
                     // set new cry offset
