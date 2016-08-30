@@ -103,22 +103,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\folder.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\sound.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\disk.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\cross.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\information.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="kricketune.ico" />
+    <None Include="Resources\Import_16x.png" />
+    <None Include="Resources\Export_16x.png" />
+    <None Include="Resources\InformationSymbol_16x.png" />
+    <None Include="Resources\SoundFile_16x.png" />
+    <None Include="Resources\Close_16x.png" />
+    <None Include="Resources\Folder_grey_16x.png" />
+    <None Include="Resources\Save_16x.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

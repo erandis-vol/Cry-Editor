@@ -63,9 +63,9 @@ namespace Crying.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap cross {
+        internal static System.Drawing.Bitmap Close_16x {
             get {
-                object obj = ResourceManager.GetObject("cross", resourceCulture);
+                object obj = ResourceManager.GetObject("Close_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Crying.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap disk {
+        internal static System.Drawing.Bitmap Export_16x {
             get {
-                object obj = ResourceManager.GetObject("disk", resourceCulture);
+                object obj = ResourceManager.GetObject("Export_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace Crying.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap folder {
+        internal static System.Drawing.Bitmap Folder_grey_16x {
             get {
-                object obj = ResourceManager.GetObject("folder", resourceCulture);
+                object obj = ResourceManager.GetObject("Folder_grey_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace Crying.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap information {
+        internal static System.Drawing.Bitmap Import_16x {
             get {
-                object obj = ResourceManager.GetObject("information", resourceCulture);
+                object obj = ResourceManager.GetObject("Import_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,29 @@ namespace Crying.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap sound {
+        internal static System.Drawing.Bitmap InformationSymbol_16x {
             get {
-                object obj = ResourceManager.GetObject("sound", resourceCulture);
+                object obj = ResourceManager.GetObject("InformationSymbol_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Save_16x {
+            get {
+                object obj = ResourceManager.GetObject("Save_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SoundFile_16x {
+            get {
+                object obj = ResourceManager.GetObject("SoundFile_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
