@@ -75,7 +75,7 @@
             this.gROM.Margin = new System.Windows.Forms.Padding(2);
             this.gROM.Name = "gROM";
             this.gROM.Padding = new System.Windows.Forms.Padding(2);
-            this.gROM.Size = new System.Drawing.Size(245, 81);
+            this.gROM.Size = new System.Drawing.Size(245, 74);
             this.gROM.TabIndex = 1;
             this.gROM.TabStop = false;
             this.gROM.Text = "ROM";
@@ -102,7 +102,7 @@
             this.gCry.Controls.Add(this.lSampleRate);
             this.gCry.Controls.Add(this.lOffset);
             this.gCry.Controls.Add(this.lTable);
-            this.gCry.Location = new System.Drawing.Point(9, 111);
+            this.gCry.Location = new System.Drawing.Point(9, 103);
             this.gCry.Margin = new System.Windows.Forms.Padding(2);
             this.gCry.Name = "gCry";
             this.gCry.Padding = new System.Windows.Forms.Padding(2);
@@ -121,7 +121,7 @@
             this.panel1.Location = new System.Drawing.Point(7, 192);
             this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(232, 132);
+            this.panel1.Size = new System.Drawing.Size(232, 148);
             this.panel1.TabIndex = 7;
             // 
             // pSample
@@ -344,17 +344,17 @@
             this.chkClean.AutoSize = true;
             this.chkClean.Checked = true;
             this.chkClean.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkClean.Location = new System.Drawing.Point(108, 460);
+            this.chkClean.Location = new System.Drawing.Point(108, 452);
             this.chkClean.Name = "chkClean";
-            this.chkClean.Size = new System.Drawing.Size(90, 17);
+            this.chkClean.Size = new System.Drawing.Size(123, 17);
             this.chkClean.TabIndex = 4;
-            this.chkClean.Text = "Clean Old Cry";
+            this.chkClean.Text = "Clean Repointed Cry";
             this.chkClean.UseVisualStyleBackColor = true;
             // 
             // chkForceRepoint
             // 
             this.chkForceRepoint.AutoSize = true;
-            this.chkForceRepoint.Location = new System.Drawing.Point(9, 460);
+            this.chkForceRepoint.Location = new System.Drawing.Point(9, 452);
             this.chkForceRepoint.Name = "chkForceRepoint";
             this.chkForceRepoint.Size = new System.Drawing.Size(93, 17);
             this.chkForceRepoint.TabIndex = 5;
@@ -365,7 +365,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(263, 489);
+            this.ClientSize = new System.Drawing.Size(263, 481);
             this.Controls.Add(this.chkForceRepoint);
             this.Controls.Add(this.chkClean);
             this.Controls.Add(this.gCry);
