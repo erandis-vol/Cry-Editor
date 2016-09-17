@@ -35,7 +35,7 @@ namespace Crying
 
         private void FreeSpaceDialog_Load(object sender, EventArgs e)
         {
-            FindAFewOffsets();
+            Search();
 
             bOK.Enabled = false;
         }
@@ -48,31 +48,21 @@ namespace Crying
             bOK.Enabled = true;
         }
 
-        private void bOK_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void bCancel_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void tNeeded_TextChanged(object sender, EventArgs e)
         {
             if (ignore) return;
 
-            FindAFewOffsets();
+            Search();
         }
 
         private void tStart_TextChanged(object sender, EventArgs e)
         {
             if (ignore) return;
 
-            FindAFewOffsets();
+            Search();
         }
 
-        void FindAFewOffsets()
+        void Search()
         {
             // get search information
             int searchStart = 0;
@@ -114,7 +104,8 @@ namespace Crying
             listOffsets.Items.Clear();
             if (size == 0)
             {
-                MessageBox.Show("Could not find any free space!", "Out of space!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Could not find any free space!", "Out of space!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                 bOK.Enabled = false;
             }
