@@ -253,7 +253,7 @@ namespace Crying
 
             // ------------------------------
             // determine if cry requires repointing
-            if (neededBytes > cry.OriginalSize)
+            if (chkForceRepoint.Checked || neededBytes > cry.OriginalSize)
             {
                 // ------------------------------
                 // add a "freespace guard"
@@ -273,9 +273,12 @@ namespace Crying
 
                     // ------------------------------
                     // overwrite old cry with FF bytes
-                    rom.Seek(cry.Offset);
-                    for (int i = 0; i < cry.OriginalSize - 1; i++)
-                        rom.WriteByte(byte.MaxValue);
+                    if (chkClean.Checked)
+                    {
+                        rom.Seek(cry.Offset);
+                        for (int i = 0; i < cry.OriginalSize - 1; i++)
+                            rom.WriteByte(byte.MaxValue);
+                    }
 
                     // ------------------------------
                     // set new cry offset
