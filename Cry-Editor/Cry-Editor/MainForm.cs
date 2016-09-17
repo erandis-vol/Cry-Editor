@@ -187,9 +187,8 @@ namespace Crying
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Cry Editor v1.3 (8/30/2016)\nCopyright (c) 2016 Lost" +
-                "\n\nA program to edit cries in 3rd generation Pokémon games.",
-                "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using (var a = new AboutDialog())
+                a.ShowDialog();
         }
 
         private void listPokemon_SelectedIndexChanged(object sender, EventArgs e)
