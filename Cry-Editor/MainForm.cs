@@ -9,6 +9,9 @@ using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GBAHL;
+using GBAHL.IO;
+using GBAHL.Text;
 
 namespace Crying
 {
@@ -46,7 +49,7 @@ namespace Crying
             // Load ROMs info at startup
             try
             {
-                roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), "ini");
+                roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), Settings.Format.INI);
             }
             catch (Exception ex)
             {
@@ -103,11 +106,11 @@ namespace Crying
                     switch (roms.GetString(rom.Code, "TextTable"))
                     {
                         case "jap":
-                            listPokemon.Items.AddRange(rom.ReadTextTable(6, pokemonCount, CharacterEncoding.Japanese));
+                            listPokemon.Items.AddRange(rom.ReadTextTable(6, pokemonCount, Table.Encoding.Japanese));
                             break;
                         case "eng":
                         default:
-                            listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, CharacterEncoding.English));
+                            listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, Table.Encoding.English));
                             break;
                     }
                 }
@@ -122,10 +125,10 @@ namespace Crying
             if (rom == null || cry.Offset == 0) return;
 
             if (SaveCry())
-                rom.Save();
-
-            LoadCry(cry.Index);
-            DisplayCry();
+            {
+                LoadCry(cry.Index);
+                DisplayCry();
+            }
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -193,7 +196,7 @@ namespace Crying
 
         private void listPokemon_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (rom == null || rom.FilePath == string.Empty) return;
+            if (rom == null) return;
 
             try
             {
@@ -216,7 +219,10 @@ namespace Crying
             }
             catch (Exception ex)
             {
-                Console.WriteLine("e {0} {1}", ex.Message, ex.StackTrace);
+#if DEBUG
+                Console.WriteLine("ERROR: {0} {1}", ex.Message, ex.StackTrace);
+#endif
+
                 ClearCry();
             }
         }

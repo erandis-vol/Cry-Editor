@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using GBAHL.IO;
 
 namespace Crying
 {
@@ -91,7 +85,8 @@ namespace Crying
             int size = 0;
             while (size < MaximumSearchResults)
             {
-                var offset = rom.FindFreeSpace(neededBytes, startOffset: searchStart, alignment: 4);
+                //var offset = rom.FindFreeSpace(neededBytes, startOffset: searchStart, alignment: 4);
+                var offset = rom.Find(0xFF, neededBytes, searchStart);
                 if (offset == -1)
                     break;
 
