@@ -50,18 +50,18 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(14, 34);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(123, 13);
+            this.label2.Size = new System.Drawing.Size(115, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Version 1.4 (9/XX/2016)";
+            this.label2.Text = "Version 1.4 (4/1/2017)";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(14, 47);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(113, 13);
+            this.label3.Size = new System.Drawing.Size(136, 13);
             this.label3.TabIndex = 2;
-            this.label3.Text = "Copyright © Lost 2016";
+            this.label3.Text = "Copyright © lost 2016-2017";
             // 
             // label4
             // 

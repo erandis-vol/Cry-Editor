@@ -67,7 +67,7 @@
       <DependentUpon>FreeSpaceDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.Cries.cs">
-      <SubType>Form</SubType>
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

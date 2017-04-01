@@ -12,7 +12,7 @@
         public sbyte[] Data { get; set; } = null;
 
         /// <summary>
-        /// Gets or sets the number of bytes this <see cref="Crying.Cry"/> originally filled in the ROM.
+        /// Gets or sets the number of bytes this <see cref="Cry"/> originally filled in the ROM.
         /// </summary>
         public int OriginalSize { get; set; } = 0;
     }
