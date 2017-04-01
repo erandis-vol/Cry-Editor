@@ -18,5 +18,13 @@ namespace Crying
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
         }
+
+        /// <summary>
+        /// Returns the application's installation directory.
+        /// </summary>
+        public static string GetPath()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
     }
 }

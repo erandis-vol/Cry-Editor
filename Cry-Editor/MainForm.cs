@@ -43,14 +43,14 @@ namespace Crying
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // load ROMs info at startup
+            // Load ROMs info at startup
             try
             {
-                roms = Settings.FromFile("ROMs.ini", "ini");
+                roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), "ini");
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Unable to load ROMs.ini!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Unable to load ROMs.ini:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
 
