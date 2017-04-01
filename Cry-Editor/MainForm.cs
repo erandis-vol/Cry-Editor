@@ -38,6 +38,7 @@ namespace Crying
     {
         ROM rom;
         Settings roms;
+        int lastSearch = 0x720000;
 
         public MainForm()
         {

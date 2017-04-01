@@ -266,7 +266,7 @@ namespace Crying
 
                 // ------------------------------
                 // find a new offset for our cry
-                using (var fsf = new FreeSpaceDialog(rom, "The cry needs to be repointed.", data.Count))
+                using (var fsf = new FreeSpaceDialog(rom, data.Count, lastSearch))
                 {
                     if (fsf.ShowDialog() != DialogResult.OK)
                         return false;
@@ -283,6 +283,10 @@ namespace Crying
                     // ------------------------------
                     // set new cry offset
                     cry.Offset = fsf.Offset;
+
+                    // ------------------------------
+                    // remember search start
+                    lastSearch = fsf.SearchStart;
                 }
             }
 
