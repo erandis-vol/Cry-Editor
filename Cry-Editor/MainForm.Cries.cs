@@ -229,7 +229,7 @@ namespace Crying
                             blocks[n][k++] |= (byte)lookupI;
 
                         // set previous
-                        pcm = sample;
+                        pcm = (sbyte)(pcm + lookup[lookupI]);
                     }
                 }
 

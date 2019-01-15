@@ -25,9 +25,11 @@ namespace Crying
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var offset = rom.Find(0xFF, tNeeded.Value, tStart.Value);
+            var offset = rom.Find(0xFF, tNeeded.Value + 4, tStart.Value);
             if (offset > 0)
             {
+                offset += 3;
+                offset -= offset % 4;
                 bOK.Enabled = true;
                 tRepointTo.Value = offset;
             }
