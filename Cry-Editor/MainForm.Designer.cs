@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.gROM = new System.Windows.Forms.GroupBox();
             this.lROM = new System.Windows.Forms.Label();
             this.gCry = new System.Windows.Forms.GroupBox();
@@ -377,8 +375,6 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Cry Editor";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.gROM.ResumeLayout(false);
             this.gROM.PerformLayout();
             this.gCry.ResumeLayout(false);
@@ -394,8 +390,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.GroupBox gROM;
         private System.Windows.Forms.GroupBox gCry;
         private System.Windows.Forms.Label lROM;

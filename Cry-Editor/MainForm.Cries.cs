@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Media;
 using System.Text;
 using System.Windows.Forms;
+using GBAHL.IO;
+using GBAHL;
 
 namespace Crying
 {
@@ -19,10 +21,10 @@ namespace Crying
 
         Bitmap cryImage;
 
-        Tuple<int, bool> GetCryIndex(int pokemonIndex)
+        (int, bool) GetCryIndex(int pokemonIndex)
         {
             if (pokemonIndex == 0)
-                return new Tuple<int, bool>(-1, false);
+                return (-1, false);
 
             // get table index
             int tableIndex = pokemonIndex - 1;
@@ -30,112 +32,118 @@ namespace Crying
             // beyond Celebi, load from order table
             if (pokemonIndex >= 277)    // 277 is Treecko
             {
-                rom.Seek(hoennCryOrder + (pokemonIndex - 277) * 2);
-                tableIndex = rom.ReadUInt16();
+                // TODO: Pull this out.
+                using (var gb = new RomReader(romFile.OpenRead()))
+                {
+                    gb.Seek(hoennCryOrder + (pokemonIndex - 277) * 2);
+                    tableIndex = gb.ReadUInt16();
+                }
             }
 
             // pokemon between Celebi and Treecko have no cry
             if (pokemonIndex > 251 && pokemonIndex < 277)
             {
                 //tableIndex = 387 + (pokemonIndex - 251);
-                return new Tuple<int, bool>(-1, false); ;
+                return (-1, false);
             }
 
             // pokemon beyond Chimecho skip the ???/Unown slots
             if (pokemonIndex > 411)
             {
-                //tableIndex += 24;
-                // TODO: someone needs to tell me if this works
+                //tableIndex += 24; // TODO
             }
 
-            return new Tuple<int, bool>(tableIndex, true);
+            return (tableIndex, true);
         }
 
         bool LoadCry(int index)
         {
-            if (rom == null)
+            if (romFile == null)
                 return false;
 
-            // ------------------------------
-            // load cry table entry
-            rom.Seek(cryTable + index * 12);
-            var someValue = rom.ReadInt32();
-            var cryOffset = rom.ReadPointer();
-            var cryShape = rom.ReadInt32();
-
-            if (cryOffset == 0)
-                return false;
-
-            // ------------------------------
-            // load cry data
-            rom.Seek(cryOffset);
-            var start = rom.Position;
-
-            cry.Offset = cryOffset;
-            cry.Index = index;
-            cry.Compressed = rom.ReadUInt16() == 0x0001;
-            cry.Looped = rom.ReadUInt16() == 0x4000;
-            cry.SampleRate = rom.ReadInt32() >> 10;
-            cry.LoopStart = rom.ReadInt32();
-            var originalSize = rom.ReadInt32() + 1;
-
-            if (!cry.Compressed)
+            using (var gb = new RomReader(romFile.OpenRead()))
             {
-                // ------------------------------
-                // uncompressed, 1 sample per 1 byte of size
-                cry.Data = new sbyte[originalSize];
-                for (int i = 0; i < originalSize; i++)
-                    cry.Data[i] = rom.ReadSByte();
-            }
-            else
-            {
-                // ------------------------------
-                // compressed, a bit of a hassle
-                var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
+                // Load cry table entry
+                gb.Seek(cryTable + index * 12);
+                int someValue = gb.ReadInt32();
+                Ptr cryOffset = gb.ReadPtr();
+                int cryShape = gb.ReadInt32();
 
-                int alignment = 0, size = 0;
-                sbyte pcmLevel = 0;
+                if (!cryOffset.IsValid || cryOffset.IsZero)
+                    return false;
 
-                var data = new List<sbyte>();
-                while (true)
+                // ------------------------------
+                // load cry data
+                gb.Seek(cryOffset);
+
+                cry.Offset = cryOffset;
+                cry.Index = index;
+                cry.Compressed = gb.ReadUInt16() == 0x0001;
+                cry.Looped = gb.ReadUInt16() == 0x4000;
+                cry.SampleRate = gb.ReadInt32() >> 10;
+                cry.LoopStart = gb.ReadInt32();
+                int originalSize = gb.ReadInt32() + 1;
+
+                if (!cry.Compressed)
                 {
-                    if (alignment == 0)
+                    // ------------------------------
+                    // uncompressed, 1 sample per 1 byte of size
+                    cry.Data = new sbyte[originalSize];
+                    for (int i = 0; i < originalSize; i++)
+                        cry.Data[i] = gb.ReadSByte();
+                }
+                else
+                {
+                    // ------------------------------
+                    // compressed, a bit of a hassle
+                    var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
+
+                    int alignment = 0, size = 0;
+                    sbyte pcmLevel = 0;
+
+                    var data = new List<sbyte>();
+                    while (true)
                     {
-                        pcmLevel = rom.ReadSByte();
+                        if (alignment == 0)
+                        {
+                            pcmLevel = gb.ReadSByte();
+                            data.Add(pcmLevel);
+
+                            alignment = 0x20;
+                        }
+
+                        var input = gb.ReadByte();
+                        if (alignment < 0x20)
+                        {
+                            // first nybble
+                            pcmLevel += lookup[input >> 4];
+                            data.Add(pcmLevel);
+                        }
+
+                        // second nybble
+                        pcmLevel += lookup[input & 0xF];
                         data.Add(pcmLevel);
 
-                        alignment = 0x20;
+                        // exit when currentSize >= cry.Size
+                        size += 2;
+                        if (size >= originalSize)
+                            break;
+
+                        alignment--;
                     }
 
-                    var input = rom.ReadByte();
-                    if (alignment < 0x20)
-                    {
-                        // first nybble
-                        pcmLevel += lookup[input >> 4];
-                        data.Add(pcmLevel);
-                    }
-
-                    // second nybble
-                    pcmLevel += lookup[input & 0xF];
-                    data.Add(pcmLevel);
-
-                    // exit when currentSize >= cry.Size
-                    size += 2;
-                    if (size >= originalSize) break;
-
-                    alignment--;
+                    cry.Data = data.ToArray();
                 }
 
-                cry.Data = data.ToArray();
+                cry.OriginalSize = gb.Position - cryOffset.Address; // total bytes used by the cry originally
+                return true;
             }
-
-            cry.OriginalSize = rom.Position - start; // total bytes used by the cry originally
-            return true;
         }
 
         bool SaveCry()
         {
-            if (rom == null || cry.Offset == 0) return false;
+            if (romFile == null || cry.Offset == Ptr.Zero)
+                return false;
 
             // copy cry data to be written
             var data = new List<byte>();
@@ -266,7 +274,7 @@ namespace Crying
 
                 // ------------------------------
                 // find a new offset for our cry
-                using (var fsf = new FreeSpaceDialog(rom, data.Count, lastSearch))
+                using (var fsf = new FreeSpaceDialog(romFile, data.Count, lastSearch))
                 {
                     if (fsf.ShowDialog() != DialogResult.OK)
                         return false;
@@ -275,9 +283,10 @@ namespace Crying
                     // overwrite old cry with FF bytes
                     if (chkClean.Checked)
                     {
-                        rom.Seek(cry.Offset);
-                        for (int i = 0; i < cry.OriginalSize - 1; i++)
-                            rom.WriteByte(byte.MaxValue);
+                        // TODO: Redo this.
+                        //gb.Seek(cry.Offset);
+                        //for (int i = 0; i < cry.OriginalSize - 1; i++)
+                        //    gb.WriteByte(byte.MaxValue);
                     }
 
                     // ------------------------------
@@ -290,29 +299,32 @@ namespace Crying
                 }
             }
 
-            // ------------------------------
-            // write cry
-            rom.Seek(cry.Offset);
-            rom.WriteUInt16((ushort)(cry.Compressed ? 1 : 0));  //
-            rom.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0)); //
-            rom.WriteInt32(cry.SampleRate << 10);               // 
-            rom.WriteInt32(cry.LoopStart);                      // cries should always be 00
-            rom.WriteInt32(cry.Data.Length - 1);                // length of cry uncompressed - 1
-            rom.WriteBytes(data.ToArray());
+            using (var gb = new RomWriter(romFile.OpenWrite()))
+            {
+                // ------------------------------
+                // write cry
+                gb.Seek(cry.Offset);
+                gb.WriteUInt16((ushort)(cry.Compressed ? 1 : 0));  //
+                gb.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0)); //
+                gb.WriteInt32(cry.SampleRate << 10);               // 
+                gb.WriteInt32(cry.LoopStart);                      // cries should always be 00
+                gb.WriteInt32(cry.Data.Length - 1);                // length of cry uncompressed - 1
+                gb.WriteBytes(data.ToArray());
 
-            // ------------------------------
-            // write cry table entry
-            rom.Seek(cryTable + cry.Index * 12);
-            rom.WriteUInt32(cry.Compressed ? 0x00003C20u : 0x00003C00u);
-            rom.WritePointer(cry.Offset);
-            rom.WriteUInt32(0x00FF00FFu);
+                // ------------------------------
+                // write cry table entry
+                gb.Seek(cryTable + cry.Index * 12);
+                gb.WriteUInt32(cry.Compressed ? 0x00003C20u : 0x00003C00u);
+                gb.WritePtr(cry.Offset);
+                gb.WriteUInt32(0x00FF00FFu);
 
-            // ------------------------------
-            // write growl table entry
-            rom.Seek(growlTable + cry.Index * 12);
-            rom.WriteUInt32(cry.Compressed ? 0x00003C30u : 0x00003C00u); // !!! not sure if 00 should be used for uncompressed
-            rom.WritePointer(cry.Offset);
-            rom.WriteUInt32(0x00FF00FFu);
+                // ------------------------------
+                // write growl table entry
+                gb.Seek(growlTable + cry.Index * 12);
+                gb.WriteUInt32(cry.Compressed ? 0x00003C30u : 0x00003C00u); // !!! not sure if 00 should be used for uncompressed
+                gb.WritePtr(cry.Offset);
+                gb.WriteUInt32(0x00FF00FFu);
+            }
             return true;
         }
 
@@ -351,45 +363,57 @@ namespace Crying
             }
         }
 
-        Tuple<int, string> ImportCry(string filename)
+        enum CryImportResult
         {
-            if (this.cry.Offset == 0)
-                return new Tuple<int, string>(0, "You haven't loaded a cry!");
+            Success,
+            Error,
+            ErrorMissingFmt,
+            ErrorMissingData,
+            ErrorUnsupportedFormat,
+            ErrorMultipleChannels,
+            ErrorNot8Bits,
+            WarningAdjustedSampleRate,
+        }
+
+        CryImportResult ImportCry(string filename)
+        {
+            //if (cry.Offset == 0)
+            //    return new Tuple<int, string>(0, "You haven't loaded a cry!");
 
             // temporary cry
             //var cry = new Cry();
 
             // load a wave file
-            using (var reader = new BinaryReader(File.OpenRead(filename)))
+            using (var reader = new BinaryReader(File.Open(filename, FileMode.Open)))
             {
                 // read RIFF header
                 if (reader.ReadUInt32() != 0x46464952)
-                    return new Tuple<int, string>(0, "This is not a WAV file!");
+                    return CryImportResult.Error;
                 if (reader.ReadInt32() + 8 != reader.BaseStream.Length)
-                    return new Tuple<int, string>(0, "Invalid file length!");
+                    return CryImportResult.Error;
                 if (reader.ReadUInt32() != 0x45564157)
-                    return new Tuple<int, string>(0, "This is not a WAV file!");
+                    return CryImportResult.Error;
 
                 // read fmt chunk
                 if (reader.ReadUInt32() != 0x20746D66)
-                    return new Tuple<int, string>(0, "Expected fmt chunk!");
+                    return CryImportResult.ErrorMissingFmt;
                 if (reader.ReadInt32() != 16)
-                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
+                    return CryImportResult.ErrorUnsupportedFormat;
                 if (reader.ReadInt16() != 1)          // only PCM format allowed
-                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
+                    return CryImportResult.ErrorUnsupportedFormat;
                 if (reader.ReadInt16() != 1)          // only 1 channel allowed
-                    return new Tuple<int, string>(0, "WAB cannot have more than one channel!");
+                    return CryImportResult.ErrorMultipleChannels;
                 var sampleRate = reader.ReadInt32();
                 if (reader.ReadInt32() != sampleRate)
-                    return new Tuple<int, string>(0, "WAV is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
+                    return CryImportResult.ErrorUnsupportedFormat;
                 reader.ReadUInt16();
                 var bitsPerSample = reader.ReadUInt16();
                 if (bitsPerSample != 8)              // for now, only 8 bit PCM data
-                    return new Tuple<int, string>(0, $"WAV must be 8-bit PCM WAV files!\nGot {bitsPerSample}-bit instead.\nEnsure your file is an 8-bit PCM WAV file.");
+                    return CryImportResult.ErrorNot8Bits;
 
                 // data chunk
                 if (reader.ReadUInt32() != 0x61746164)
-                    return new Tuple<int, string>(0, "Expected data chunk, but got something else!\nYour WAV likely is an unsupported format.\nEnsure your file is an 8-bit PCM WAV file.");
+                    return CryImportResult.ErrorMissingData;
                 var dataSize = reader.ReadInt32();
 
                 var data = new sbyte[dataSize];
@@ -409,17 +433,18 @@ namespace Crying
             if (cry.SampleRate != ((cry.SampleRate << 10) >> 10))
             {
                 cry.SampleRate = (cry.SampleRate << 10) >> 10;
-                return new Tuple<int, string>(1, "Your cry was imported correctly, but the sample rate was not suited for the GBA and will be altered a bit.");
+                return CryImportResult.WarningAdjustedSampleRate;
             }
 
             // success, no message needed
-            return new Tuple<int, string>(2, string.Empty);
+            return CryImportResult.Success;
         }
 
         void PlayCry()
         {
             // TODO: we could do this in another thread :O
-            if (cry.Offset == 0) return;
+            if (cry.Offset == 0)
+                return;
 
             using (var stream = new MemoryStream())
             {

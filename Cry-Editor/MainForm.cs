@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using GBAHL;
 using GBAHL.IO;
 using GBAHL.Text;
+using GBAHL.Text.Pokemon;
 
 namespace Crying
 {
@@ -36,94 +37,107 @@ namespace Crying
 
     public partial class MainForm : Form
     {
-        ROM rom;
-        Settings roms;
-        int lastSearch = 0x720000;
+        private RomFileInfo romFile = null;
+        private IniFile romInfo = null;
+        private int lastSearch = 0x720000;
 
         public MainForm()
         {
             InitializeComponent();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
             // Load ROMs info at startup
             try
             {
-                roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), Settings.Format.INI);
+                //roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), Settings.Format.INI);
+                romInfo = new IniFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ROMs.ini"));
             }
-            catch (Exception ex)
+            catch (FileNotFoundException)
             {
-                MessageBox.Show($"Unable to load ROMs.ini:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    "Unable to locate \"ROMs.ini\".",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 Application.Exit();
             }
 
             // on success, prepare
             ClearCry();
+
+            base.OnLoad(e);
         }
-        
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
         {
-            rom?.Dispose();
             cryImage?.Dispose();
+            cryImage = null;
+
+            base.OnFormClosed(e);
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Title = "Open ROM";
-            openFileDialog1.Filter = "GBA ROMs|*.gba";
-
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            using (var dialog = new OpenFileDialog { Title = "Open Game", Filter = "GBA ROMs|*.gba" })
             {
-                // open the ROM file
-                var temp = new ROM(openFileDialog1.FileName);
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
 
-                // check for a valid ROM code
-                if (!roms.ContainsSection(temp.Code))
+                RomFileInfo tempFileInfo = new RomFileInfo(dialog.FileName);
+                string tempCode = tempFileInfo.Code;
+
+                int nameTableOffset;
+                string[] names;
+                string encoding;
+
+                // Grab ROM information from settings
+                try
                 {
-                    MessageBox.Show($"ROM type {temp.Code} is not supported!", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    temp.Dispose();
+                    pokemonCount    = romInfo.GetInt32(tempCode, "NumberOfPokemon");
+                    cryTable        = romInfo.GetInt32(tempCode, "CryData");
+                    growlTable      = romInfo.GetInt32(tempCode, "GrowlData");
+                    hoennCryOrder   = romInfo.GetInt32(tempCode, "HoennCryOrder");
+                    nameTableOffset = romInfo.GetInt32(tempCode, "PokemonNames");
+                    encoding        = romInfo.GetString(tempCode, "TextTable");
+                }
+                catch (KeyNotFoundException ke)
+                {
+                    // Uh-oh! The key could not be found.
+                    MessageBox.Show(ke.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                // copy temp to rom, closing old one first
-                rom?.Dispose();
-                rom = temp;
-
-                // get some basic info
-                pokemonCount = roms.GetInt32(rom.Code, "NumberOfPokemon", 10);
-                cryTable = roms.GetInt32(rom.Code, "CryData", 16);
-                growlTable = roms.GetInt32(rom.Code, "GrowlData", 16);
-                hoennCryOrder = roms.GetInt32(rom.Code, "HoennCryOrder", 16);
-
-                // valid ROM opened, load all necessary data
+                // Perform initial loading of Pokemon names
+                using (var rr = new RomReader(tempFileInfo.OpenRead()))
                 {
-                    // load Pokemon names
-                    var firstPokemonName = roms.GetInt32(rom.Code, "PokemonNames", 16);
-                    rom.Seek(firstPokemonName);
+                    rr.Seek(nameTableOffset);
 
-                    listPokemon.Items.Clear();
-                    switch (roms.GetString(rom.Code, "TextTable"))
+                    // TODO: Support more encodings.
+                    if (encoding == "jpn")
                     {
-                        case "jap":
-                            listPokemon.Items.AddRange(rom.ReadTextTable(6, pokemonCount, Table.Encoding.Japanese));
-                            break;
-                        case "eng":
-                        default:
-                            listPokemon.Items.AddRange(rom.ReadTextTable(11, pokemonCount, Table.Encoding.English));
-                            break;
+                        names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.Japanese);
+                    }
+                    else
+                    {
+                        names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.International);
                     }
                 }
 
-                // display ROM info
-                lROM.Text = $"Name: {rom.Name}\nCode: {rom.Code}\nCry Table: 0x{cryTable:X6}\nNumber of Pokémon: {pokemonCount}";
+                // Display ROM info
+                lROM.Text = $"Name: {tempFileInfo.Title}{Environment.NewLine}Code: {tempFileInfo.Code}{Environment.NewLine}Cry Table: 0x{cryTable:X6}{Environment.NewLine}Number of Pokémon: {pokemonCount}";
+
+                // Assuming everything loaded correctly, we are good to go
+                romFile = tempFileInfo;
             }
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (rom == null || cry.Offset == 0) return;
+            if (romFile == null || cry.Offset == 0)
+                return;
 
             if (SaveCry())
             {
@@ -134,9 +148,7 @@ namespace Crying
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            rom?.Dispose();
-            rom = null;
-
+            romFile = null;
             listPokemon.Items.Clear();
         }
 
@@ -154,50 +166,114 @@ namespace Crying
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (cry.Offset == 0) return;
+            if (cry.Offset == 0)
+                return;
 
-            openFileDialog1.FileName = "";
-            openFileDialog1.Title = "Import Cry";
-            openFileDialog1.Filter = "Wave Files|*.wav";
-
-            if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
-
-            // TODO: support more formats
-            var result = ImportCry(openFileDialog1.FileName);
-            if (result.Item1 == 0)      // error
-                MessageBox.Show(result.Item2, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else if (result.Item1 == 1) // warning
-                MessageBox.Show(result.Item2, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-            if (result.Item1 != 0)
+            using (var dialog = new OpenFileDialog { Title = "Import Cry", Filter = "Wave Files|*.wav" })
             {
-                DisplayCry();
-                gCry.Text = "Cry*";
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                CryImportResult result = ImportCry(dialog.FileName);
+                switch (result)
+                {
+                    case CryImportResult.Error:
+                        MessageBox.Show(
+                            "The WAVE file could not be loaded.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.ErrorMissingFmt:
+                        MessageBox.Show(
+                            $"Expected the fmt chunk.{Environment.NewLine}The WAVE file is likely invalid.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.ErrorMissingData:
+                        MessageBox.Show(
+                            $"Expected the data chunk.{Environment.NewLine}The WAVE file is likely invalid.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.ErrorUnsupportedFormat:
+                        MessageBox.Show(
+                            "The WAVE file has an unsupported format.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.ErrorMultipleChannels:
+                        MessageBox.Show(
+                            $"The WAVE file contains multiple channels.{Environment.NewLine}Ensure that imported cries only contain one channel.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.ErrorNot8Bits:
+                        MessageBox.Show(
+                            "The WAVE file does not contain 8 bits per sample.",
+                            "Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+
+                    case CryImportResult.WarningAdjustedSampleRate:
+                        MessageBox.Show(
+                            "The cry was imported successfully, but the sample rate was adjusted for the GBA.",
+                            "Warning",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                        goto default;
+
+                    default:
+                        DisplayCry();
+                        gCry.Text = "Cry*";
+                        break;
+                }
             }
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (cry.Offset == 0) return;
+            if (cry.Offset == 0)
+                return;
 
-            saveFileDialog1.Title = "Export Cry";
-            saveFileDialog1.Filter = "Wave Files|*.wav";
+            using (var dialog = new SaveFileDialog { Title = "Export Cry", Filter = "Wave Files|*.wav" })
+            {
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
 
-            if (saveFileDialog1.ShowDialog() != DialogResult.OK) return;
-
-            // TODO: support more formats
-            ExportCry(saveFileDialog1.FileName);
+                ExportCry(dialog.FileName);
+            }
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var a = new AboutDialog())
-                a.ShowDialog();
+            using (var dialog = new AboutDialog())
+            {
+                dialog.ShowDialog();
+            }
         }
 
         private void listPokemon_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (rom == null) return;
+            if (romFile == null)
+                return;
 
             try
             {

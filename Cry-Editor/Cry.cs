@@ -1,9 +1,11 @@
-﻿namespace Crying
+﻿using GBAHL;
+
+namespace Crying
 {
     class Cry
     {
         public int Index { get; set; } = 0;
-        public int Offset { get; set; } = 0;
+        public Ptr Offset { get; set; } = Ptr.Zero;
         public bool Compressed { get; set; } = false;
         public bool Looped { get; set; } = false;
         public int SampleRate { get; set; } = 0;

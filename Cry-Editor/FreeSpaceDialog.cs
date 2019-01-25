@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
 using GBAHL.IO;
 
@@ -6,16 +7,27 @@ namespace Crying
 {
     public partial class FreeSpaceDialog : Form
     {
-        ROM rom;
+        private GbaBinaryStream rom;
 
-        public FreeSpaceDialog(ROM rom, int neededBytes, int searchStart)
+        public FreeSpaceDialog(string romFileName, int neededBytes, int searchStart)
         {
             InitializeComponent();
-            this.rom = rom;
+            rom = new GbaBinaryStream(File.OpenRead(romFileName));
 
             tNeeded.Value = neededBytes;
             tNeeded.Enabled = false;
             tStart.Value = searchStart;
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            if (rom != null)
+            {
+                rom.Dispose();
+                rom = null;
+            }
+
+            base.OnFormClosed(e);
         }
 
         private void FreeSpaceDialog_Load(object sender, EventArgs e)
@@ -25,7 +37,7 @@ namespace Crying
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var offset = rom.Find(0xFF, tNeeded.Value + 4, tStart.Value);
+            var offset = rom.Find(0xFF, tNeeded.Value, tStart.Value, 4);
             if (offset > 0)
             {
                 offset += 3;
@@ -47,12 +59,14 @@ namespace Crying
 
         public int Offset
         {
-            get { return tRepointTo.Value; }
+            get => tRepointTo.Value;
+            set => tRepointTo.Value = value;
         }
 
         public int SearchStart
         {
-            get { return tStart.Value; }
+            get => tStart.Value;
+            set => tStart.Value = value;
         }
     }
 }
