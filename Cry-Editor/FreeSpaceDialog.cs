@@ -1,18 +1,33 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using GBAHL.IO;
+using GBAHL;
 
 namespace Crying
 {
     public partial class FreeSpaceDialog : Form
     {
-        private GbaBinaryStream rom;
+        private RomReader rom;
 
-        public FreeSpaceDialog(string romFileName, int neededBytes, int searchStart)
+        public FreeSpaceDialog(RomFileInfo romFile, int neededBytes, int searchStart)
         {
             InitializeComponent();
-            rom = new GbaBinaryStream(File.OpenRead(romFileName));
+
+            try
+            {
+                rom = new RomReader(romFile.OpenRead());
+            }
+            catch
+            {
+                MessageBox.Show(
+                    "There was an error opening the ROM.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                Close();
+                return;
+            }
 
             tNeeded.Value = neededBytes;
             tNeeded.Enabled = false;

@@ -1,18 +1,9 @@
-﻿using System;
+﻿using GBAHL;
+using GBAHL.Text.Pokemon;
+using System;
 using System.IO;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Media;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using GBAHL;
-using GBAHL.IO;
-using GBAHL.Text;
-using GBAHL.Text.Pokemon;
 
 namespace Crying
 {
@@ -51,7 +42,6 @@ namespace Crying
             // Load ROMs info at startup
             try
             {
-                //roms = Settings.FromFile(Path.Combine(Program.GetPath(), "ROMs.ini"), Settings.Format.INI);
                 romInfo = new IniFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ROMs.ini"));
             }
             catch (FileNotFoundException)
@@ -111,20 +101,36 @@ namespace Crying
                 }
 
                 // Perform initial loading of Pokemon names
-                using (var rr = new RomReader(tempFileInfo.OpenRead()))
+                try
                 {
-                    rr.Seek(nameTableOffset);
+                    using (var rr = new RomReader(tempFileInfo.OpenRead()))
+                    {
+                        rr.Seek(nameTableOffset);
 
-                    // TODO: Support more encodings.
-                    if (encoding == "jpn")
-                    {
-                        names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.Japanese);
-                    }
-                    else
-                    {
-                        names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.International);
+                        // TODO: Support more encodings.
+                        if (encoding == "jpn")
+                        {
+                            names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.Japanese);
+                        }
+                        else
+                        {
+                            names = rr.ReadTextTable(11, pokemonCount, FireRedEncoding.International);
+                        }
                     }
                 }
+                catch
+                {
+                    MessageBox.Show(
+                        "There was an error loading the Pokémon names.",
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return;
+                }
+
+                listPokemon.Items.Clear();
+                listPokemon.Items.AddRange(names);
 
                 // Display ROM info
                 lROM.Text = $"Name: {tempFileInfo.Title}{Environment.NewLine}Code: {tempFileInfo.Code}{Environment.NewLine}Cry Table: 0x{cryTable:X6}{Environment.NewLine}Number of Pokémon: {pokemonCount}";
@@ -136,13 +142,13 @@ namespace Crying
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (romFile == null || cry.Offset == 0)
-                return;
-
-            if (SaveCry())
+            if (cry.IsValid)
             {
-                LoadCry(cry.Index);
-                DisplayCry();
+                if (SaveCry())
+                {
+                    ReloadCry();
+                    DisplayCry();
+                }
             }
         }
 
@@ -159,14 +165,15 @@ namespace Crying
 
         private void playToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (cry.Offset == 0) return;
-
-            PlayCry();
+            if (cry.IsValid)
+            {
+                PlayCry();
+            }
         }
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (cry.Offset == 0)
+            if (!cry.IsValid)
                 return;
 
             using (var dialog = new OpenFileDialog { Title = "Import Cry", Filter = "Wave Files|*.wav" })
@@ -250,15 +257,15 @@ namespace Crying
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (cry.Offset == 0)
-                return;
-
-            using (var dialog = new SaveFileDialog { Title = "Export Cry", Filter = "Wave Files|*.wav" })
+            if (cry.IsValid)
             {
-                if (dialog.ShowDialog() != DialogResult.OK)
-                    return;
+                using (var dialog = new SaveFileDialog { Title = "Export Cry", Filter = "Wave Files|*.wav" })
+                {
+                    if (dialog.ShowDialog() != DialogResult.OK)
+                        return;
 
-                ExportCry(dialog.FileName);
+                    ExportCry(dialog.FileName);
+                }
             }
         }
 
@@ -277,19 +284,21 @@ namespace Crying
 
             try
             {
-                // get pokemon index
+                // Get pokemon index
                 int pokemonIndex = listPokemon.SelectedIndex;
 
-                // get cry index
-                var tableIndex = GetCryIndex(pokemonIndex);
-                if (!tableIndex.Item2)
+                // Determine cry index and load the cry
+                using (var reader = new RomReader(romFile.OpenRead()))
                 {
-                    ClearCry();
-                    return;
-                }
+                    var tableIndex = GetCryIndex(pokemonIndex, reader);
+                    if (tableIndex == -1)
+                    {
+                        ClearCry();
+                        return;
+                    }
 
-                // load cry at index
-                LoadCry(tableIndex.Item1);
+                    LoadCry(tableIndex, reader);
+                }
 
                 // cry loaded, output
                 DisplayCry();
@@ -306,9 +315,10 @@ namespace Crying
 
         private void chkCompressed_CheckedChanged(object sender, EventArgs e)
         {
-            if (cry.Offset == 0) return;
-
-            cry.Compressed = chkCompressed.Checked;
+            if (cry.IsValid)
+            {
+                cry.IsCompressed = chkCompressed.Checked;
+            }
         }
     }
 }
