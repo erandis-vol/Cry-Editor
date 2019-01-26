@@ -189,7 +189,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Find Free Space";
-            this.TopMost = true;
             this.Load += new System.EventHandler(this.FreeSpaceDialog_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
