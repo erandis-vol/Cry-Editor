@@ -45,7 +45,7 @@ namespace Crying
         /// <summary>
         /// Gets the size of the cry in bytes.
         /// </summary>
-        public int Size => Data == null ? 0 : Data.Length;
+        public int Size => 16 + (Data == null ? 0 : Data.Length);
 
         /// <summary>
         /// Gets or sets the original size of the cry in bytes.

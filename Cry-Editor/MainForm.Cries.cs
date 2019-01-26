@@ -332,6 +332,11 @@ namespace Crying
             return true;
         }
 
+        private const uint WaveMagicRiff = 0x46464952u;
+        private const uint WaveMagicWave = 0x45564157u;
+        private const uint WaveMagicFmt_ = 0x20746D66u;
+        private const uint WaveMagicData = 0x61746164u;
+
         private void ExportCry(string filename)
         {
             // http://www-mmsp.ece.mcgill.ca/documents/audioformats/wave/wave.html
@@ -339,12 +344,12 @@ namespace Crying
             using (var writer = new BinaryWriter(File.Create(filename)))
             {
                 // RIFF header
-                writer.Write(Encoding.ASCII.GetBytes("RIFF"));  // file ID
+                writer.Write(WaveMagicRiff);                    // file ID
                 writer.Write(0);                                // file size placeholder
-                writer.Write(Encoding.ASCII.GetBytes("WAVE"));  // format
+                writer.Write(WaveMagicWave);                    // format
 
                 // fmt chunk
-                writer.Write(Encoding.ASCII.GetBytes("fmt "));  // chunk ID
+                writer.Write(WaveMagicFmt_);                    // chunk ID
                 writer.Write(16);                               // chunk size, 16 for PCM
                 writer.Write((ushort)1);                        // format: 1 = wave_format_pcm
                 writer.Write((ushort)1);                        // channel count
@@ -354,7 +359,7 @@ namespace Crying
                 writer.Write((ushort)8);                        // bits per sample
 
                 // data chunk
-                writer.Write(Encoding.ASCII.GetBytes("data"));  // chunk ID
+                writer.Write(WaveMagicData);                    // chunk ID
                 writer.Write(cry.Data.Length);                  // chunk size
                 foreach (var sample in cry.Data)
                     writer.Write((byte)(sample + 0x80));        // wave PCM is unsigned unlike GBA PCM which is
@@ -379,25 +384,18 @@ namespace Crying
 
         private CryImportResult ImportCry(string filename)
         {
-            //if (cry.Offset == 0)
-            //    return new Tuple<int, string>(0, "You haven't loaded a cry!");
-
-            // temporary cry
-            //var cry = new Cry();
-
-            // load a wave file
             using (var reader = new BinaryReader(File.Open(filename, FileMode.Open)))
             {
                 // read RIFF header
-                if (reader.ReadUInt32() != 0x46464952)
+                if (reader.ReadUInt32() != WaveMagicRiff)
                     return CryImportResult.Error;
                 if (reader.ReadInt32() + 8 != reader.BaseStream.Length)
                     return CryImportResult.Error;
-                if (reader.ReadUInt32() != 0x45564157)
+                if (reader.ReadUInt32() != WaveMagicWave)
                     return CryImportResult.Error;
 
                 // read fmt chunk
-                if (reader.ReadUInt32() != 0x20746D66)
+                if (reader.ReadUInt32() != WaveMagicFmt_)
                     return CryImportResult.ErrorMissingFmt;
                 if (reader.ReadInt32() != 16)
                     return CryImportResult.ErrorUnsupportedFormat;
@@ -414,7 +412,7 @@ namespace Crying
                     return CryImportResult.ErrorNot8Bits;
 
                 // data chunk
-                if (reader.ReadUInt32() != 0x61746164)
+                if (reader.ReadUInt32() != WaveMagicData)
                     return CryImportResult.ErrorMissingData;
                 var dataSize = reader.ReadInt32();
 
@@ -450,12 +448,12 @@ namespace Crying
                 using (var writer = new BinaryWriter(stream, Encoding.ASCII, true))
                 {
                     // RIFF header
-                    writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+                    writer.Write(WaveMagicRiff);
                     writer.Write(0);
-                    writer.Write(Encoding.ASCII.GetBytes("WAVE"));
+                    writer.Write(WaveMagicWave);
 
                     // fmt chunk
-                    writer.Write(Encoding.ASCII.GetBytes("fmt "));
+                    writer.Write(WaveMagicFmt_);
                     writer.Write(16);
                     writer.Write((ushort)1);
                     writer.Write((ushort)1);
@@ -465,7 +463,7 @@ namespace Crying
                     writer.Write((ushort)8);
 
                     // data chunk
-                    writer.Write(Encoding.ASCII.GetBytes("data"));
+                    writer.Write(WaveMagicData);
                     writer.Write(cry.Data.Length);
                     foreach (var sample in cry.Data)
                         writer.Write((byte)(sample + 0x80));
@@ -476,10 +474,9 @@ namespace Crying
                 }
 
                 // play it via a soundplayer
-                stream.Seek(0L, SeekOrigin.Begin);
                 using (var player = new SoundPlayer(stream))
                 {
-                    player.Load();
+                    stream.Seek(0L, SeekOrigin.Begin);
                     player.Play();
                 }
             }
@@ -502,10 +499,10 @@ namespace Crying
 
             using (var g = Graphics.FromImage(cryImage))
             {
-                g.DrawLine(SystemPens.ControlLight, 0, 0, cry.Data.Length, 0);
-                g.DrawLine(SystemPens.ControlLight, 0, 32, cry.Data.Length, 32);
-                g.DrawLine(SystemPens.ControlLight, 0, 64, cry.Data.Length, 64);
-                g.DrawLine(SystemPens.ControlLight, 0, 96, cry.Data.Length, 96);
+                g.DrawLine(SystemPens.ControlLight, 0,   0, cry.Data.Length,   0);
+                g.DrawLine(SystemPens.ControlLight, 0,  32, cry.Data.Length,  32);
+                g.DrawLine(SystemPens.ControlLight, 0,  64, cry.Data.Length,  64);
+                g.DrawLine(SystemPens.ControlLight, 0,  96, cry.Data.Length,  96);
                 g.DrawLine(SystemPens.ControlLight, 0, 128, cry.Data.Length, 128);
 
                 for (int i = 0; i < cry.Data.Length / 32 + 1; i++)
@@ -539,8 +536,7 @@ namespace Crying
             chkLooped.Checked = false;
 
             cryImage?.Dispose();
-            cryImage = new Bitmap(1, 1);
-            pSample.Image = cryImage;
+            pSample.Image = cryImage = null;
 
             playToolStripMenuItem.Enabled = false;
             importToolStripMenuItem.Enabled = false;
