@@ -144,10 +144,35 @@ namespace Crying
         {
             if (cry.IsValid)
             {
-                if (SaveCry())
+                try
+                {
+                    SaveCry();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "There was an error saving the cry:" + Environment.NewLine + ex,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return;
+                }
+
+                try
                 {
                     ReloadCry();
                     DisplayCry();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        "There was an error reloading the cry:" + Environment.NewLine + ex,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    ClearCry();
                 }
             }
         }

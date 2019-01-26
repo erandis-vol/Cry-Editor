@@ -79,8 +79,7 @@ namespace Crying
             if (!cryOffset.IsValid || cryOffset.IsZero)
                 return false;
 
-            // ------------------------------
-            // load cry data
+            // Load cry
             reader.Seek(cryOffset);
 
             cry.Offset = cryOffset;
@@ -91,19 +90,9 @@ namespace Crying
             cry.LoopTo = reader.ReadInt32();
             int originalSize = reader.ReadInt32() + 1;
 
-            if (!cry.IsCompressed)
+            if (cry.IsCompressed)
             {
-                // ------------------------------
-                // uncompressed, 1 sample per 1 byte of size
-                cry.Data = new sbyte[originalSize];
-                for (int i = 0; i < originalSize; i++)
-                    cry.Data[i] = reader.ReadSByte();
-            }
-            else
-            {
-                // ------------------------------
-                // compressed, a bit of a hassle
-                var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
+                sbyte[] lookup = Cry.Lookup;
 
                 int alignment = 0, size = 0;
                 sbyte pcmLevel = 0;
@@ -139,197 +128,99 @@ namespace Crying
                     alignment--;
                 }
 
-                cry.Data = data.ToArray();
-            }
-
-            // total bytes used by the cry originally
-            cry.OriginalSize = cry.Size;
-            return true;
-        }
-
-        private bool SaveCry()
-        {
-            // copy cry data to be written
-            var data = new List<byte>();
-            if (cry.IsCompressed)
-            {
-                // ------------------------------
-                // data is compressed in blocks of 1 + 0x20 bytes at a time
-                // first byte is normal signed PCM data
-                // following 0x20 bytes are compressed based on previous value
-
-                // compression lookup table
-                // { 0x0, 0x1, 0x4, 0x9, 0x10, 0x19, 0x24, 0x31, 0xC0, 0xCF, 0xDC, 0xE7, 0xF0, 0xF7, 0xFC, 0xFF };
-                var lookup = new sbyte[] { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
-
-                // ------------------------------
-                // calculate number of needed blocks
-                var blockCount = cry.Data.Length / 0x40;
-                if (cry.Data.Length % 0x40 > 0) blockCount++;
-
-                // ------------------------------
-                // calculate the length of the last block to save space
-                var lastBlockSize = cry.Data.Length - cry.Data.Length / 0x40 * 0x40;
-                if (lastBlockSize == 0)
-                    lastBlockSize = 0x21;
-                else
-                    lastBlockSize = 1 + (lastBlockSize / 2) + (lastBlockSize % 2 == 0 ? 0 : 1);
-
-                // ------------------------------
-                // compress all blocks
-                var blocks = new byte[blockCount][];
-                for (int n = 0; n < blockCount; n++)
-                {
-                    // ------------------------------
-                    // create new block
-                    if (n < blockCount - 1)
-                        blocks[n] = new byte[0x21];
-                    else
-                        blocks[n] = new byte[lastBlockSize];
-
-                    int i = n * 0x40;   // position in source
-                    int k = 0;          // position in block
-
-                    // ------------------------------
-                    // set first sample
-                    // upper nybble is skipped
-                    blocks[n][k++] = (byte)cry.Data[i];
-                    sbyte pcm = cry.Data[i++];
-
-                    // ------------------------------
-                    // compress rest of block
-                    for (int j = 1; j < 0x40 && i < cry.Data.Length; j++)
-                    {
-                        // get current sample
-                        var sample = cry.Data[i++];
-
-                        // difference between previous sample and this
-                        var diff = sample - pcm;
-
-                        // ------------------------------
-                        // check for a perfect match in lookup table
-                        var lookupI = -1;
-                        for (int x = 0; x < 16; x++)
-                        {
-                            if (lookup[x] == diff)
-                            {
-                                lookupI = x;
-                                break;
-                            }
-                        }
-
-                        // ------------------------------
-                        // search for the closest match in the table (perfect match not found)
-                        if (lookupI == -1)
-                        {
-                            var bestDiff = 255;
-                            for (int x = 0; x < 16; x++)
-                            {
-                                if (Math.Abs(lookup[x] - diff) < bestDiff)
-                                {
-                                    lookupI = x;
-                                    bestDiff = Math.Abs(lookup[x] - diff);
-                                }
-                            }
-                        }
-
-                        // set value in block
-                        // on an odd value, increase position in block
-                        if (j % 2 == 0)
-                            blocks[n][k] |= (byte)(lookupI << 4);
-                        else
-                            blocks[n][k++] |= (byte)lookupI;
-
-                        // set previous
-                        pcm = (sbyte)(pcm + lookup[lookupI]);
-                    }
-                }
-
-                // ------------------------------
-                // copy blocks to output list
-                for (int n = 0; n < blockCount; n++)
-                    data.AddRange(blocks[n]);
+                cry.Data = data.ToArray();                
             }
             else
             {
-                // ------------------------------
-                // uncompressed, copy directly to output
-                foreach (var s in cry.Data)
-                    data.Add((byte)s);
+                // uncompressed, 1 sample per 1 byte of size
+                cry.Data = new sbyte[originalSize];
+                for (int i = 0; i < originalSize; i++)
+                    cry.Data[i] = reader.ReadSByte();
             }
 
-            // ------------------------------
-            // calculate number of bytes needed to save this cry
-            // length of data + 16 bytes for the header
-            var neededBytes = data.Count + 16;
+            // total bytes used by the cry originally
+            cry.OriginalSize = reader.Position - cryOffset.Address;
+            return true;
+        }
 
-            // ------------------------------
-            // determine if cry requires repointing
+        private void SaveCry()
+        {
+            // Grab the cry's data, optionally compressing it
+            sbyte[] data = cry.Data;
+            if (cry.IsCompressed)
+                data = Cry.Compress(data) ?? throw new NullReferenceException();
+
+            // Calculate number of bytes needed to save this cry
+            int neededBytes = 16 + data.Length;
+
+            // Prepare to save the cry
+            Ptr originalOffset = cry.Offset;
+
+            // Determine if cry requires repointing
             if (chkForceRepoint.Checked || neededBytes > cry.OriginalSize)
             {
-                // ------------------------------
-                // add a "freespace guard"
+                // Add a "freespace guard"
                 // 00 byte added to a cry that ends with FF
-                if (data[data.Count - 1] == 0xFF)
+                if (data[data.Length - 1] == unchecked((sbyte)0xFF))
                 {
-                    data.Add(0x00);
+                    Array.Resize(ref data, data.Length + 1);
                     neededBytes++;
                 }
 
-                // ------------------------------
-                // find a new offset for our cry
-                using (var fsf = new FreeSpaceDialog(romFile, data.Count, lastSearch))
+                // Find a new offset for our cry
+                using (var dialog = new FreeSpaceDialog(romFile, neededBytes, lastSearch))
                 {
-                    if (fsf.ShowDialog() != DialogResult.OK)
-                        return false;
-
-                    // ------------------------------
-                    // overwrite old cry with FF bytes
-                    if (chkClean.Checked)
+                    if (dialog.ShowDialog() != DialogResult.OK)
                     {
-                        // TODO: Redo this.
-                        //gb.Seek(cry.Offset);
-                        //for (int i = 0; i < cry.OriginalSize - 1; i++)
-                        //    gb.WriteByte(byte.MaxValue);
+                        MessageBox.Show(
+                            "Saving of cry was canceled.",
+                            "Canceled",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                        return;
                     }
 
-                    // ------------------------------
-                    // set new cry offset
-                    cry.Offset = (Ptr)fsf.Offset;
+                    // Set new cry offset
+                    cry.Offset = (Ptr)dialog.Offset;
 
-                    // ------------------------------
-                    // remember search start
-                    lastSearch = fsf.SearchStart;
+                    // Remember search start for next time
+                    lastSearch = dialog.SearchStart;
                 }
             }
 
-            using (var rw = new RomWriter(romFile.OpenWrite()))
+            using (var writer = new RomWriter(romFile.OpenWrite()))
             {
-                // ------------------------------
-                // write cry
-                rw.Seek(cry.Offset);
-                rw.WriteUInt16((ushort)(cry.IsCompressed ? 1 : 0));  //
-                rw.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0)); //
-                rw.WriteInt32(cry.SampleRate << 10);               // 
-                rw.WriteInt32(cry.LoopTo);                      // cries should always be 00
-                rw.WriteInt32(cry.Data.Length - 1);                // length of cry uncompressed - 1
-                rw.WriteBytes(data.ToArray());
+                // Overwrite original cry, if needed
+                if (originalOffset != cry.Offset && chkClean.Checked)
+                {
+                    writer.Seek(originalOffset);
+                    for (int i = 0; i < cry.OriginalSize; i++)
+                        writer.WriteByte(0xFF);
+                }
 
-                // ------------------------------
-                // write cry table entry
-                rw.Seek(cryTable + cry.Index * 12);
-                rw.WriteUInt32(cry.IsCompressed ? 0x00003C20u : 0x00003C00u);
-                rw.WritePtr(cry.Offset);
-                rw.WriteUInt32(0x00FF00FFu);
+                // Write cry
+                writer.Seek(cry.Offset);
+                writer.WriteUInt16((ushort)(cry.IsCompressed ? 1 : 0)); //
+                writer.WriteUInt16((ushort)(cry.Looped ? 0x4000 : 0));  //
+                writer.WriteInt32(cry.SampleRate << 10);                // 
+                writer.WriteInt32(cry.LoopTo);                          // cries should always be 00
+                writer.WriteInt32(cry.Data.Length - 1);                 // length of cry uncompressed - 1
+                foreach (sbyte s in data)
+                    writer.WriteSByte(s);
 
-                // ------------------------------
-                // write growl table entry
-                rw.Seek(growlTable + cry.Index * 12);
-                rw.WriteUInt32(cry.IsCompressed ? 0x00003C30u : 0x00003C00u); // !!! not sure if 00 should be used for uncompressed
-                rw.WritePtr(cry.Offset);
-                rw.WriteUInt32(0x00FF00FFu);
+                // Write cry table entry
+                writer.Seek(cryTable + cry.Index * 12);
+                writer.WriteUInt32(cry.IsCompressed ? 0x00003C20u : 0x00003C00u);
+                writer.WritePtr(cry.Offset);
+                writer.WriteUInt32(0x00FF00FFu);
+
+                // Write growl table entry
+                writer.Seek(growlTable + cry.Index * 12);
+                writer.WriteUInt32(cry.IsCompressed ? 0x00003C30u : 0x00003C00u); // !!! not sure if 00 should be used for uncompressed
+                writer.WritePtr(cry.Offset);
+                writer.WriteUInt32(0x00FF00FFu);
             }
-            return true;
         }
 
         private const uint WaveMagicRiff = 0x46464952u;
@@ -484,8 +375,8 @@ namespace Crying
 
         private void DisplayCry()
         {
-            lTable.Text = $"Table: 0x{(cryTable + cry.Index * 12):X6}";
-            lOffset.Text = $"Offset: 0x{cry.Offset:X6}";
+            lTable.Text = $"Table: 0x" + (cryTable + cry.Index * 12).ToString("X7");
+            lOffset.Text = $"Offset: 0x" + cry.Offset.ToString("X7");
             lSampleRate.Text = $"Sample Rate: {cry.SampleRate} Hz";
             lSize.Text = $"Size: {cry.Data.Length} samples";
             gCry.Text = "Cry";
